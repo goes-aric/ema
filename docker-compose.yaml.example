@@ -1,0 +1,101 @@
+version: "3"
+services:
+  nginx:
+    build: ./image_nginx
+    container_name: ema_nginx
+    image: image_nginx
+    # command: >
+    #   bash -c "
+    #     cp image_nginx/vhost/default.conf /etc/nginx/conf.d/default.conf &&
+    #     nginx -g 'daemon off;'
+    #   "
+    volumes:
+      - "./image_nginx/vhost/default.conf:/etc/nginx/conf.d/default.conf"
+      - ".:/var/www/html"
+      - "./storage/app/public:/var/www/html/storage/app/public"
+      - "./storage/app/public:/var/www/html/public/media"
+      # - "ema_assets:/var/www/html/public/storage"
+    working_dir: /var/www/html
+    ports:
+      - "3000:80"
+    expose:
+      - 80
+    links:
+      - php
+      - mysql
+    depends_on:
+      - mysql
+    networks:
+      default:
+        #ipv4_address: 172.1.0.2
+  php:
+    build: ./image_php
+    container_name: ema_php
+    image: image_php
+    #command: >
+    #  bash -c "
+    #      service supervisor start &&
+    #      php-fpm
+    #  "
+    # command: >
+    #   bash -c "
+    #     cp image_php/php.ini /usr/local/etc/php/php.ini &&
+    #     php-fpm
+    #   "
+    volumes:
+      - "./image_php/php.ini:/usr/local/etc/php/php.ini"
+      - "./image_php/laravel-worker.conf:/etc/supervisor/conf.d/laravel-worker.conf"
+      - ".:/var/www/html"
+      - "./storage/app/public:/var/www/html/storage/app/public"
+      - "./storage/app/public:/var/www/html/public/media"
+      # - "ema_assets:/var/www/html/public/storage"
+    working_dir: /var/www/html
+    links:
+      - mysql
+    depends_on:
+      - mysql
+    networks:
+      default:
+        #ipv4_address: 172.1.0.3
+  mysql:
+    image: mysql:5.7.36
+    container_name: ema_database
+    environment:
+      # SET PASSWORD FOR ROOT MYSQL USER
+      MYSQL_ROOT_PASSWORD: 'app@proj3ct'
+    ports:
+      - '3306:3306'
+    expose:
+      - 3306
+    volumes:
+      - ema_database:/var/lib/mysql
+    networks:
+      default:
+        #ipv4_address: 172.1.0.4
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ema_phpmyadmin
+    ports:
+      - '3001:80'
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+      - UPLOAD_LIMIT=1024M
+    networks:
+      default:
+        #ipv4_address: 172.1.0.5
+    links:
+      - mysql
+    depends_on:
+      - mysql
+volumes:
+  ema_code:
+    external: true
+  ema_database:
+    external: true
+  ema_assets:
+    external: true
+networks:
+  default:
+    name: ema_network
+    external: true
