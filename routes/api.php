@@ -6,6 +6,7 @@ use App\Http\Controllers\Akun\AkunController;
 use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Pembelian\PembelianController;
+use App\Http\Controllers\Penjualan\PenjualanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +45,16 @@ Route::middleware(['auth:api'])->group(function(){
         Route::put('/pembelian/{id}', 'update')->name('pembelian.update');
         Route::delete('/pembelian/{id}', 'destroy')->name('pembelian.destroy');
         Route::delete('/pembelian', 'destroyMultiple')->name('pembelian.destroyMultiple');
+    });
+
+    /* PENJUALAN */
+    Route::controller(PenjualanController::class)->group(function(){
+        Route::get('/penjualan', 'index')->name('penjualan.index');
+        Route::post('/penjualan', 'store')->name('penjualan.store');
+        Route::get('/penjualan/{id}', 'show')->name('penjualan.show');
+        Route::put('/penjualan/{id}', 'update')->name('penjualan.update');
+        Route::delete('/penjualan/{id}', 'destroy')->name('penjualan.destroy');
+        Route::delete('/penjualan', 'destroyMultiple')->name('penjualan.destroyMultiple');
     });
 
     /* USERS & LOGOUT */

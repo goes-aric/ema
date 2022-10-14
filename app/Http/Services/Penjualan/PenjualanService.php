@@ -2,22 +2,24 @@
 namespace App\Http\Services\Penjualan;
 
 use Exception;
-use App\Models\Akun;
+use App\Models\Penjualan;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
-use App\Http\Resources\Akun\AkunResource;
+use App\Http\Resources\Penjualan\PenjualanResource;
 
 class PenjualanService extends BaseService
 {
     /* PRIVATE VARIABLE */
     private $penjualanModel;
+    private $carbon;
 
     public function __construct()
     {
-        $this->penjualanModel = new Akun();
+        $this->penjualanModel = new Penjualan();
+        $this->carbon = $this->returnCarbon();
     }
 
-    /* FETCH ALL PEMBELIAN */
+    /* FETCH ALL PENJUALAN */
     public function fetchLimit($props){
         /* GET DATA FOR PAGINATION AS A MODEL */
         $getAllData = $this->dataFilterPagination($this->penjualanModel, [], null);
@@ -32,7 +34,7 @@ class PenjualanService extends BaseService
 
         /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
         $datas = $datas->get();
-        $datas = AkunResource::collection($datas);
+        $datas = PenjualanResource::collection($datas);
         $penjualan = [
             "total" => $totalData,
             "total_filter" => $totalFiltered,
@@ -50,12 +52,12 @@ class PenjualanService extends BaseService
         return $penjualan;
     }
 
-    /* FETCH AKUN BY ID */
+    /* FETCH PENJUALAN BY ID */
     public function fetchById($id){
         try {
             $penjualan = $this->penjualanModel::find($id);
             if ($penjualan) {
-                $penjualan = AkunResource::make($penjualan);
+                $penjualan = PenjualanResource::make($penjualan);
                 return $penjualan;
             }
 
@@ -65,24 +67,28 @@ class PenjualanService extends BaseService
         }
     }
 
-    /* CREATE NEW PEMBELIAN */
-    public function createAkun($props){
+    /* CREATE NEW PENJUALAN */
+    public function createPenjualan($props){
         /* BEGIN DB TRANSACTION */
         DB::beginTransaction();
 
         try {
+            $newID = $this->createNoTransaksi();
+
             $penjualan = $this->penjualanModel;
-            $penjualan->kode_akun    = $props['kode_akun'];
-            $penjualan->nama_akun    = $props['nama_akun'];
-            $penjualan->akun_utama   = $props['akun_utama'];
-            $penjualan->tipe_akun    = $props['tipe_akun'];
-            $penjualan->created_id   = $this->returnAuthUser()->id;
+            $penjualan->kode_jual               = $newID;
+            $penjualan->tanggal                 = $props['tanggal'];
+            $penjualan->nominal                 = $props['nominal'];
+            $penjualan->uraian                  = $props['uraian'];
+            $penjualan->kode_akun_persediaan    = $props['kode_akun_persediaan'];
+            $penjualan->kode_akun_penerimaan    = $props['kode_akun_penerimaan'];
+            $penjualan->kode_user               = $this->returnAuthUser()->kode_user;
             $penjualan->save();
 
             /* COMMIT DB TRANSACTION */
             DB::commit();
 
-            $penjualan = AkunResource::make($penjualan);
+            $penjualan = PenjualanResource::make($penjualan);
             return $penjualan;
         } catch (Exception $ex) {
             /* ROLLBACK DB TRANSACTION */
@@ -92,26 +98,28 @@ class PenjualanService extends BaseService
         }
     }
 
-    /* UPDATE PEMBELIAN */
-    public function updateAkun($props, $id){
+    /* UPDATE PENJUALAN */
+    public function updatePenjualan($props, $id){
         /* BEGIN DB TRANSACTION */
         DB::beginTransaction();
 
         try {
             $penjualan = $this->penjualanModel::find($id);
             if ($penjualan) {
-                /* UPDATE PEMBELIAN */
-                $penjualan->kode_akun    = $props['kode_akun'];
-                $penjualan->nama_akun    = $props['nama_akun'];
-                $penjualan->akun_utama   = $props['akun_utama'];
-                $penjualan->tipe_akun    = $props['tipe_akun'];
-                $penjualan->updated_id   = $this->returnAuthUser()->id;
+                /* UPDATE PENJUALAN */
+                $penjualan->tanggal                 = $props['tanggal'];
+                $penjualan->nominal                 = $props['nominal'];
+
+                $penjualan->uraian                  = $props['uraian'];
+                $penjualan->kode_akun_persediaan    = $props['kode_akun_persediaan'];
+                $penjualan->kode_akun_penerimaan    = $props['kode_akun_penerimaan'];
+                $penjualan->kode_user               = $this->returnAuthUser()->kode_user;
                 $penjualan->update();
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();
 
-                $penjualan = AkunResource::make($penjualan);
+                $penjualan = PenjualanResource::make($penjualan);
                 return $penjualan;
             } else {
                 throw new Exception('Catatan tidak ditemukan!');
@@ -124,8 +132,8 @@ class PenjualanService extends BaseService
         }
     }
 
-    /* DESTROY PEMBELIAN */
-    public function destroyAkun($id){
+    /* DESTROY PENJUALAN */
+    public function destroyPenjualan($id){
         try {
             $penjualan = $this->penjualanModel::find($id);
             if ($penjualan) {
@@ -140,8 +148,8 @@ class PenjualanService extends BaseService
         }
     }
 
-    /* DESTROY SELECTED / MULTIPLE PEMBELIAN */
-    public function destroyMultipleAkun($props){
+    /* DESTROY SELECTED / MULTIPLE PENJUALAN */
+    public function destroyMultiplePenjualan($props){
         try {
             $penjualan = $this->penjualanModel::whereIn('id', $props);
 
@@ -157,29 +165,14 @@ class PenjualanService extends BaseService
         }
     }
 
-    /* FETCH ALL AKUN FOR OPTIONS */
-    public function fetchDataOptions($props){
-        try {
-            /* GET DATA WITH FILTER AS A MODEL */
-            $datas = $this->dataFilterPagination($this->penjualanModel, $props, null);
-
-            /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
-            $penjualan = $datas->select('id', 'kode_akun', 'nama_akun')->get();
-
-            return $penjualan;
-        } catch (Exception $ex) {
-            throw $ex;
-        }
-    }
-
     /* GENERATE NO TRANSAKSI AUTOMATICALLY */
     public function createNoTransaksi(){
         $year   = $this->carbon::now()->format('Y');
 
         $newID  = "";
-        $maxID  = DB::select('SELECT IFNULL(RIGHT(MAX(kode_user), 5), 0) AS maxID FROM users WHERE deleted_at IS NULL AND RIGHT(LEFT(kode_user, 7), 4) = :id', ['id' => $year]);
+        $maxID  = DB::select('SELECT IFNULL(RIGHT(MAX(kode_jual), 5), 0) AS maxID FROM penjualan WHERE deleted_at IS NULL AND RIGHT(LEFT(kode_jual, 7), 4) = :id', ['id' => $year]);
         $newID  = (int)$maxID[0]->maxID + 1;
-        $newID  = 'PJ-'.$year.''.substr("0000000$newID", -3);
+        $newID  = 'PJ-'.$year.''.substr("0000000$newID", -5);
 
         return $newID;
     }
