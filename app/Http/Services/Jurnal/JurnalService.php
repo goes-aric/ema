@@ -2,10 +2,10 @@
 namespace App\Http\Services\Jurnal;
 
 use Exception;
-use App\Models\Akun;
+use App\Models\JurnalUmum;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
-use App\Http\Resources\Akun\AkunResource;
+use App\Http\Resources\Jurnal\JurnalResource;
 
 class JurnalService extends BaseService
 {
@@ -15,7 +15,7 @@ class JurnalService extends BaseService
 
     public function __construct()
     {
-        $this->jurnalModel = new Akun();
+        $this->jurnalModel = new JurnalUmum();
         $this->carbon = $this->returnCarbon();
     }
 
@@ -34,7 +34,7 @@ class JurnalService extends BaseService
 
         /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
         $datas = $datas->get();
-        $datas = AkunResource::collection($datas);
+        $datas = JurnalResource::collection($datas);
         $jurnal = [
             "total" => $totalData,
             "total_filter" => $totalFiltered,
@@ -57,7 +57,7 @@ class JurnalService extends BaseService
         try {
             $jurnal = $this->jurnalModel::find($id);
             if ($jurnal) {
-                $jurnal = AkunResource::make($jurnal);
+                $jurnal = JurnalResource::make($jurnal);
                 return $jurnal;
             }
 
@@ -68,7 +68,7 @@ class JurnalService extends BaseService
     }
 
     /* CREATE NEW JURNAL */
-    public function createAkun($props){
+    public function createJurnal($props){
         /* BEGIN DB TRANSACTION */
         DB::beginTransaction();
 
@@ -76,17 +76,17 @@ class JurnalService extends BaseService
             $newID = $this->createNoJurnal();
 
             $jurnal = $this->jurnalModel;
-            $jurnal->kode_akun    = $props['kode_akun'];
-            $jurnal->nama_akun    = $props['nama_akun'];
-            $jurnal->akun_utama   = $props['akun_utama'];
-            $jurnal->tipe_akun    = $props['tipe_akun'];
-            $jurnal->created_id   = $this->returnAuthUser()->id;
+            $jurnal->no_jurnal          = $newID;
+            $jurnal->tanggal_transaksi  = $props['tanggal_transaksi'];
+            $jurnal->deskripsi          = $props['deskripsi'];
+            $jurnal->sumber             = $props['sumber'];
+            $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
             $jurnal->save();
 
             /* COMMIT DB TRANSACTION */
             DB::commit();
 
-            $jurnal = AkunResource::make($jurnal);
+            $jurnal = JurnalResource::make($jurnal);
             return $jurnal;
         } catch (Exception $ex) {
             /* ROLLBACK DB TRANSACTION */
@@ -97,7 +97,7 @@ class JurnalService extends BaseService
     }
 
     /* UPDATE JURNAL */
-    public function updateAkun($props, $id){
+    public function updateJurnal($props, $id){
         /* BEGIN DB TRANSACTION */
         DB::beginTransaction();
 
@@ -105,17 +105,16 @@ class JurnalService extends BaseService
             $jurnal = $this->jurnalModel::find($id);
             if ($jurnal) {
                 /* UPDATE JURNAL */
-                $jurnal->kode_akun    = $props['kode_akun'];
-                $jurnal->nama_akun    = $props['nama_akun'];
-                $jurnal->akun_utama   = $props['akun_utama'];
-                $jurnal->tipe_akun    = $props['tipe_akun'];
-                $jurnal->updated_id   = $this->returnAuthUser()->id;
+                $jurnal->tanggal_transaksi  = $props['tanggal_transaksi'];
+                $jurnal->deskripsi          = $props['deskripsi'];
+                $jurnal->sumber             = $props['sumber'];
+                $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
                 $jurnal->update();
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();
 
-                $jurnal = AkunResource::make($jurnal);
+                $jurnal = JurnalResource::make($jurnal);
                 return $jurnal;
             } else {
                 throw new Exception('Catatan tidak ditemukan!');
@@ -129,7 +128,7 @@ class JurnalService extends BaseService
     }
 
     /* DESTROY JURNAL */
-    public function destroyAkun($id){
+    public function destroyJurnal($id){
         try {
             $jurnal = $this->jurnalModel::find($id);
             if ($jurnal) {
@@ -145,7 +144,7 @@ class JurnalService extends BaseService
     }
 
     /* DESTROY SELECTED / MULTIPLE JURNAL */
-    public function destroyMultipleAkun($props){
+    public function destroyMultipleJurnal($props){
         try {
             $jurnal = $this->jurnalModel::whereIn('id', $props);
 
@@ -161,29 +160,14 @@ class JurnalService extends BaseService
         }
     }
 
-    /* FETCH ALL JURNAL FOR OPTIONS */
-    public function fetchDataOptions($props){
-        try {
-            /* GET DATA WITH FILTER AS A MODEL */
-            $datas = $this->dataFilterPagination($this->jurnalModel, $props, null);
-
-            /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
-            $jurnal = $datas->select('id', 'kode_akun', 'nama_akun')->get();
-
-            return $jurnal;
-        } catch (Exception $ex) {
-            throw $ex;
-        }
-    }
-
     /* GENERATE NO JURNAL AUTOMATICALLY */
     public function createNoJurnal(){
         $year   = $this->carbon::now()->format('Y');
 
         $newID  = "";
-        $maxID  = DB::select('SELECT IFNULL(RIGHT(MAX(kode_user), 5), 0) AS maxID FROM users WHERE deleted_at IS NULL AND RIGHT(LEFT(kode_user, 7), 4) = :id', ['id' => $year]);
+        $maxID  = DB::select('SELECT IFNULL(RIGHT(MAX(no_jurnal), 5), 0) AS maxID FROM jurnal_umum WHERE deleted_at IS NULL AND RIGHT(LEFT(no_jurnal, 7), 4) = :id', ['id' => $year]);
         $newID  = (int)$maxID[0]->maxID + 1;
-        $newID  = 'JU-'.$year.''.substr("0000000$newID", -3);
+        $newID  = 'JU-'.$year.''.substr("0000000$newID", -5);
 
         return $newID;
     }

@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Akun\AkunController;
 use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Jurnal\JurnalController;
+use App\Http\Controllers\Jurnal\DetailJurnalController;
 use App\Http\Controllers\Pembelian\PembelianController;
 use App\Http\Controllers\Penjualan\PenjualanController;
 
@@ -55,6 +57,26 @@ Route::middleware(['auth:api'])->group(function(){
         Route::put('/penjualan/{id}', 'update')->name('penjualan.update');
         Route::delete('/penjualan/{id}', 'destroy')->name('penjualan.destroy');
         Route::delete('/penjualan', 'destroyMultiple')->name('penjualan.destroyMultiple');
+    });
+
+    /* JURNAL UMUM */
+    Route::controller(JurnalController::class)->group(function(){
+        Route::get('/jurnal', 'index')->name('jurnal.index');
+        Route::post('/jurnal', 'store')->name('jurnal.store');
+        Route::get('/jurnal/{id}', 'show')->name('jurnal.show');
+        Route::put('/jurnal/{id}', 'update')->name('jurnal.update');
+        Route::delete('/jurnal/{id}', 'destroy')->name('jurnal.destroy');
+        Route::delete('/jurnal', 'destroyMultiple')->name('jurnal.destroyMultiple');
+    });
+
+    /* DETAIL JURNAL UMUM */
+    Route::controller(DetailJurnalController::class)->group(function(){
+        Route::get('/detail-jurnal', 'index')->name('detail-jurnal.index');
+        Route::post('/detail-jurnal', 'store')->name('detail-jurnal.store');
+        Route::get('/detail-jurnal/{id}', 'show')->name('detail-jurnal.show');
+        Route::put('/detail-jurnal/{id}', 'update')->name('detail-jurnal.update');
+        Route::delete('/detail-jurnal/{id}', 'destroy')->name('detail-jurnal.destroy');
+        Route::delete('/detail-jurnal', 'destroyMultiple')->name('detail-jurnal.destroyMultiple');
     });
 
     /* USERS & LOGOUT */
