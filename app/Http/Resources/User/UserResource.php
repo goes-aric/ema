@@ -15,7 +15,7 @@ class UserResource extends JsonResource
             'no_telp'   => $this->no_telp,
             'username'  => $this->username,
             'email'     => $this->email,
-            'hak_akses' => $this->is_admin
+            'hak_akses' => $this->hak_akses
         ];
     }
 }

@@ -250,27 +250,15 @@ class UserService extends BaseService
 
             /* RUN AUTH ATTEMPT */
             if (Auth::attempt([$usernameField => $username, $passwordField => $password])) {
-                // UPDATE LAST LOGIN TIME
                 $user = $this->returnAuthUser();
+                $token = $user->createToken('myToken')->accessToken;
 
-                if ($user->status == 1) {
-                    $update = $this->model::find($user->id);
-                    $update->last_visit = $this->carbon::now();
-                    $update->update();
-                    $token = $user->createToken('myToken')->accessToken;
-
-                    $user = UserResource::make($user);
-                    $responseData = [
-                        'data'  => $user,
-                        'token' => $token
-                    ];
-                    return $responseData;
-                }
-
-                // LOGOUT USER
-                Auth::logout();
-
-                throw new Exception('Akun anda tidak aktif. Silakan hubungi administrator anda!');
+                $user = UserResource::make($user);
+                $responseData = [
+                    'data'  => $user,
+                    'token' => $token
+                ];
+                return $responseData;
             } else {
                 throw new Exception('Username atau Password salah');
             }
