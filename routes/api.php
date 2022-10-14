@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Akun\AkunController;
 use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Pembelian\PembelianController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,13 +28,22 @@ Route::middleware(['auth:api'])->group(function(){
     /* BAGAN AKUN */
     Route::controller(AkunController::class)->group(function(){
         Route::get('/akun/options', 'fetchDataOptions')->name('akun.fetchDataOptions');
-        Route::get('/akun/all', 'list')->name('akun.list');
         Route::get('/akun', 'index')->name('akun.index');
         Route::post('/akun', 'store')->name('akun.store');
         Route::get('/akun/{id}', 'show')->name('akun.show');
         Route::put('/akun/{id}', 'update')->name('akun.update');
         Route::delete('/akun/{id}', 'destroy')->name('akun.destroy');
         Route::delete('/akun', 'destroyMultiple')->name('akun.destroyMultiple');
+    });
+
+    /* PEMBELIAN */
+    Route::controller(PembelianController::class)->group(function(){
+        Route::get('/pembelian', 'index')->name('pembelian.index');
+        Route::post('/pembelian', 'store')->name('pembelian.store');
+        Route::get('/pembelian/{id}', 'show')->name('pembelian.show');
+        Route::put('/pembelian/{id}', 'update')->name('pembelian.update');
+        Route::delete('/pembelian/{id}', 'destroy')->name('pembelian.destroy');
+        Route::delete('/pembelian', 'destroyMultiple')->name('pembelian.destroyMultiple');
     });
 
     /* USERS & LOGOUT */

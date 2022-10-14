@@ -2,19 +2,21 @@
 namespace App\Http\Services\Pembelian;
 
 use Exception;
-use App\Models\Akun;
+use App\Models\Pembelian;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
-use App\Http\Resources\Akun\AkunResource;
+use App\Http\Resources\Pembelian\PembelianResource;
 
 class PembelianService extends BaseService
 {
     /* PRIVATE VARIABLE */
     private $pembelianModel;
+    private $carbon;
 
     public function __construct()
     {
-        $this->pembelianModel = new Akun();
+        $this->pembelianModel = new Pembelian();
+        $this->carbon = $this->returnCarbon();
     }
 
     /* FETCH ALL PEMBELIAN */
@@ -32,7 +34,7 @@ class PembelianService extends BaseService
 
         /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
         $datas = $datas->get();
-        $datas = AkunResource::collection($datas);
+        $datas = PembelianResource::collection($datas);
         $pembelian = [
             "total" => $totalData,
             "total_filter" => $totalFiltered,
@@ -55,7 +57,7 @@ class PembelianService extends BaseService
         try {
             $pembelian = $this->pembelianModel::find($id);
             if ($pembelian) {
-                $pembelian = AkunResource::make($pembelian);
+                $pembelian = PembelianResource::make($pembelian);
                 return $pembelian;
             }
 
@@ -66,23 +68,28 @@ class PembelianService extends BaseService
     }
 
     /* CREATE NEW PEMBELIAN */
-    public function createAkun($props){
+    public function createPembelian($props){
         /* BEGIN DB TRANSACTION */
         DB::beginTransaction();
 
         try {
+            $newID = $this->createNoTransaksi();
+
             $pembelian = $this->pembelianModel;
-            $pembelian->kode_akun    = $props['kode_akun'];
-            $pembelian->nama_akun    = $props['nama_akun'];
-            $pembelian->akun_utama   = $props['akun_utama'];
-            $pembelian->tipe_akun    = $props['tipe_akun'];
-            $pembelian->created_id   = $this->returnAuthUser()->id;
+            $pembelian->kode_beli               = $newID;
+            $pembelian->tanggal                 = $props['tanggal'];
+            $pembelian->nominal                 = $props['nominal'];
+            $pembelian->metode_bayar            = $props['metode_bayar'];
+            $pembelian->uraian                  = $props['uraian'];
+            $pembelian->kode_akun_persediaan    = $props['kode_akun_persediaan'];
+            $pembelian->kode_akun_pembayaran    = $props['kode_akun_pembayaran'];
+            $pembelian->kode_user               = $this->returnAuthUser()->kode_user;
             $pembelian->save();
 
             /* COMMIT DB TRANSACTION */
             DB::commit();
 
-            $pembelian = AkunResource::make($pembelian);
+            $pembelian = PembelianResource::make($pembelian);
             return $pembelian;
         } catch (Exception $ex) {
             /* ROLLBACK DB TRANSACTION */
@@ -93,7 +100,7 @@ class PembelianService extends BaseService
     }
 
     /* UPDATE PEMBELIAN */
-    public function updateAkun($props, $id){
+    public function updatePembelian($props, $id){
         /* BEGIN DB TRANSACTION */
         DB::beginTransaction();
 
@@ -101,17 +108,19 @@ class PembelianService extends BaseService
             $pembelian = $this->pembelianModel::find($id);
             if ($pembelian) {
                 /* UPDATE PEMBELIAN */
-                $pembelian->kode_akun    = $props['kode_akun'];
-                $pembelian->nama_akun    = $props['nama_akun'];
-                $pembelian->akun_utama   = $props['akun_utama'];
-                $pembelian->tipe_akun    = $props['tipe_akun'];
-                $pembelian->updated_id   = $this->returnAuthUser()->id;
+                $pembelian->tanggal                 = $props['tanggal'];
+                $pembelian->nominal                 = $props['nominal'];
+                $pembelian->metode_bayar            = $props['metode_bayar'];
+                $pembelian->uraian                  = $props['uraian'];
+                $pembelian->kode_akun_persediaan    = $props['kode_akun_persediaan'];
+                $pembelian->kode_akun_pembayaran    = $props['kode_akun_pembayaran'];
+                $pembelian->kode_user               = $this->returnAuthUser()->kode_user;
                 $pembelian->update();
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();
 
-                $pembelian = AkunResource::make($pembelian);
+                $pembelian = PembelianResource::make($pembelian);
                 return $pembelian;
             } else {
                 throw new Exception('Catatan tidak ditemukan!');
@@ -125,7 +134,7 @@ class PembelianService extends BaseService
     }
 
     /* DESTROY PEMBELIAN */
-    public function destroyAkun($id){
+    public function destroyPembelian($id){
         try {
             $pembelian = $this->pembelianModel::find($id);
             if ($pembelian) {
@@ -141,7 +150,7 @@ class PembelianService extends BaseService
     }
 
     /* DESTROY SELECTED / MULTIPLE PEMBELIAN */
-    public function destroyMultipleAkun($props){
+    public function destroyMultiplePembelian($props){
         try {
             $pembelian = $this->pembelianModel::whereIn('id', $props);
 
@@ -157,29 +166,14 @@ class PembelianService extends BaseService
         }
     }
 
-    /* FETCH ALL PEMBELIAN FOR OPTIONS */
-    public function fetchDataOptions($props){
-        try {
-            /* GET DATA WITH FILTER AS A MODEL */
-            $datas = $this->dataFilterPagination($this->pembelianModel, $props, null);
-
-            /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
-            $pembelian = $datas->select('id', 'kode_akun', 'nama_akun')->get();
-
-            return $pembelian;
-        } catch (Exception $ex) {
-            throw $ex;
-        }
-    }
-
     /* GENERATE NO TRANSAKSI AUTOMATICALLY */
     public function createNoTransaksi(){
         $year   = $this->carbon::now()->format('Y');
 
         $newID  = "";
-        $maxID  = DB::select('SELECT IFNULL(RIGHT(MAX(kode_user), 5), 0) AS maxID FROM users WHERE deleted_at IS NULL AND RIGHT(LEFT(kode_user, 7), 4) = :id', ['id' => $year]);
+        $maxID  = DB::select('SELECT IFNULL(RIGHT(MAX(kode_beli), 5), 0) AS maxID FROM pembelian WHERE deleted_at IS NULL AND RIGHT(LEFT(kode_beli, 7), 4) = :id', ['id' => $year]);
         $newID  = (int)$maxID[0]->maxID + 1;
-        $newID  = 'PB-'.$year.''.substr("0000000$newID", -3);
+        $newID  = 'PB-'.$year.''.substr("0000000$newID", -5);
 
         return $newID;
     }
