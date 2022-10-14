@@ -22,7 +22,7 @@ class Akun extends BaseModel
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-    	'kode_akun', 'nama_akun', 'akun_utama', 'tipe_akun', 'created_id', 'updated_id',
+    	'kode_akun', 'nama_akun', 'akun_utama', 'tipe_akun', 'kode_user',
     ];
 
     protected $table = 'akun';

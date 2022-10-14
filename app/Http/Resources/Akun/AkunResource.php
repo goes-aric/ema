@@ -13,10 +13,8 @@ class AkunResource extends JsonResource
             'nama_akun'     => $this->nama_akun,
             'akun_utama'    => $this->akun_utama,
             'tipe_akun'     => $this->tipe_akun,
-            'created_user'  => $this->createdUser->nama,
-            'updated_user'  => $this->updatedUser->nama ?? null,
-            'created_at'    => $this->created_at,
-            'updated_at'    => $this->updated_at
+            'kode_user'     => $this->createdUser->kode_user,
+            'nama_user'     => $this->createdUser->nama ?? null
         ];
     }
 }

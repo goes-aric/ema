@@ -19,10 +19,7 @@ return new class extends Migration
             $table->string('nama_akun', 255);
             $table->string('akun_utama', 150)->nullable();
             $table->string('tipe_akun', 255);
-            $table->bigInteger('created_id')->unsigned();
-            $table->foreign('created_id')->references('id')->on('users')->onDelete('cascade');
-            $table->bigInteger('updated_id')->unsigned()->nullable();
-            $table->foreign('updated_id')->references('id')->on('users')->onDelete('cascade');
+            $table->string('kode_user', 150);
             $table->timestamps();
             $table->softDeletes();
         });

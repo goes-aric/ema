@@ -12,11 +12,6 @@ class BaseModel extends Model
 
     public function createdUser()
     {
-        return $this->belongsTo('App\Models\User', 'created_id', 'id');
-    }
-
-    public function updatedUser()
-    {
-        return $this->belongsTo('App\Models\User', 'updated_id', 'id');
+        return $this->belongsTo('App\Models\User', 'kode_user', 'kode_user');
     }
 }

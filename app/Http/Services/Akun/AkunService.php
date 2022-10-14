@@ -76,7 +76,7 @@ class AkunService extends BaseService
             $akun->nama_akun    = $props['nama_akun'];
             $akun->akun_utama   = $props['akun_utama'];
             $akun->tipe_akun    = $props['tipe_akun'];
-            $akun->created_id   = $this->returnAuthUser()->id;
+            $akun->kode_user    = $this->returnAuthUser()->kode_user;
             $akun->save();
 
             /* COMMIT DB TRANSACTION */
@@ -105,7 +105,7 @@ class AkunService extends BaseService
                 $akun->nama_akun    = $props['nama_akun'];
                 $akun->akun_utama   = $props['akun_utama'];
                 $akun->tipe_akun    = $props['tipe_akun'];
-                $akun->updated_id   = $this->returnAuthUser()->id;
+                $akun->kode_user    = $this->returnAuthUser()->kode_user;
                 $akun->update();
 
                 /* COMMIT DB TRANSACTION */
