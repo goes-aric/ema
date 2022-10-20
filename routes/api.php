@@ -41,6 +41,7 @@ Route::middleware(['auth:api'])->group(function(){
 
     /* PEMBELIAN */
     Route::controller(PembelianController::class)->group(function(){
+        Route::get('/pembelian/charts', 'charts')->name('pembelian.charts');
         Route::get('/pembelian', 'index')->name('pembelian.index');
         Route::post('/pembelian', 'store')->name('pembelian.store');
         Route::get('/pembelian/{id}', 'show')->name('pembelian.show');
@@ -51,6 +52,7 @@ Route::middleware(['auth:api'])->group(function(){
 
     /* PENJUALAN */
     Route::controller(PenjualanController::class)->group(function(){
+        Route::get('/penjualan/charts', 'charts')->name('penjualan.charts');
         Route::get('/penjualan', 'index')->name('penjualan.index');
         Route::post('/penjualan', 'store')->name('penjualan.store');
         Route::get('/penjualan/{id}', 'show')->name('penjualan.show');

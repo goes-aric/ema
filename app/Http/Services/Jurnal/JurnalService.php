@@ -6,16 +6,19 @@ use App\Models\JurnalUmum;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\Jurnal\JurnalResource;
+use App\Models\DetailJurnalUmum;
 
 class JurnalService extends BaseService
 {
     /* PRIVATE VARIABLE */
     private $jurnalModel;
+    private $detailModel;
     private $carbon;
 
     public function __construct()
     {
         $this->jurnalModel = new JurnalUmum();
+        $this->detailModel = new DetailJurnalUmum();
         $this->carbon = $this->returnCarbon();
     }
 
@@ -83,6 +86,20 @@ class JurnalService extends BaseService
             $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
             $jurnal->save();
 
+            /* REMOVE PREV DETAILS */
+            $this->detailModel::where('no_jurnal', '=', $jurnal['no_jurnal'])->delete();
+
+            /* DETAILS */
+            foreach (json_decode($props['jurnal']) as $item) {
+                $detail = new $this->detailModel;
+                $detail->no_jurnal  = $jurnal['no_jurnal'];
+                $detail->kode_akun  = $item->kode_akun;
+                $detail->nama_akun  = $item->nama_akun;
+                $detail->debet      = $item->debet;
+                $detail->kredit     = $item->kredit;
+                $detail->save();
+            }
+
             /* COMMIT DB TRANSACTION */
             DB::commit();
 
@@ -110,6 +127,20 @@ class JurnalService extends BaseService
                 $jurnal->sumber             = $props['sumber'];
                 $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
                 $jurnal->update();
+
+                /* REMOVE PREV DETAILS */
+                $this->detailModel::where('no_jurnal', '=', $jurnal['no_jurnal'])->delete();
+
+                /* DETAILS */
+                foreach (json_decode($props['jurnal']) as $item) {
+                    $detail = new $this->detailModel;
+                    $detail->no_jurnal  = $jurnal['no_jurnal'];
+                    $detail->kode_akun  = $item->kode_akun;
+                    $detail->nama_akun  = $item->nama_akun;
+                    $detail->debet      = $item->debet;
+                    $detail->kredit     = $item->kredit;
+                    $detail->save();
+                }
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();

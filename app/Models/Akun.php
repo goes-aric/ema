@@ -26,4 +26,9 @@ class Akun extends BaseModel
     ];
 
     protected $table = 'akun';
+
+    public function akunInduk()
+    {
+        return $this->belongsTo('App\Models\Akun', 'akun_utama', 'kode_akun');
+    }
 }

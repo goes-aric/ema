@@ -104,4 +104,15 @@ class PenjualanController extends BaseController
             return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
         }
     }
+
+    public function charts(Request $request)
+    {
+        try {
+            $penjualan = $this->penjualanServices->charts();
+
+            return $this->returnResponse('success', self::HTTP_OK, 'Grafik penjualan', $penjualan);
+        } catch (Exception $ex) {
+            return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
+        }
+    }
 }

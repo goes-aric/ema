@@ -2,20 +2,32 @@
 namespace App\Http\Services\Pembelian;
 
 use Exception;
+use App\Models\Akun;
 use App\Models\Pembelian;
+use App\Models\JurnalUmum;
+use App\Models\DetailJurnalUmum;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\Pembelian\PembelianResource;
+use App\Http\Services\Jurnal\JurnalService;
 
 class PembelianService extends BaseService
 {
     /* PRIVATE VARIABLE */
     private $pembelianModel;
+    private $jurnalModel;
+    private $detailModel;
+    private $akunModel;
+    private $jurnalService;
     private $carbon;
 
     public function __construct()
     {
         $this->pembelianModel = new Pembelian();
+        $this->jurnalModel = new JurnalUmum();
+        $this->detailModel = new DetailJurnalUmum();
+        $this->akunModel = new Akun();
+        $this->jurnalService = new JurnalService;
         $this->carbon = $this->returnCarbon();
     }
 
@@ -86,6 +98,40 @@ class PembelianService extends BaseService
             $pembelian->kode_user               = $this->returnAuthUser()->kode_user;
             $pembelian->save();
 
+            /* GET NO JURNAL */
+            $noJurnal = $this->jurnalService->createNoJurnal();
+
+            /* CREATE JURNAL */
+            $jurnal = new $this->jurnalModel;
+            $jurnal->no_jurnal          = $noJurnal;
+            $jurnal->tanggal_transaksi  = $props['tanggal'];
+            $jurnal->deskripsi          = $props['uraian'];
+            $jurnal->sumber             = $newID;
+            $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
+            $jurnal->save();
+
+            /* PERSEDIAAN */
+            $akunPersediaan = $this->akunModel::where('kode_akun', '=', $props['kode_akun_persediaan'])->first();
+
+            $persediaan = new $this->detailModel;
+            $persediaan->no_jurnal  = $jurnal['no_jurnal'];
+            $persediaan->kode_akun  = $akunPersediaan->kode_akun;
+            $persediaan->nama_akun  = $akunPersediaan->nama_akun;
+            $persediaan->debet      = $props->nominal;
+            $persediaan->kredit     = 0;
+            $persediaan->save();
+
+            /* PEMBAYARAN */
+            $akunPembayaran = $this->akunModel::where('kode_akun', '=', $props['kode_akun_pembayaran'])->first();
+
+            $pembayaran = new $this->detailModel;
+            $pembayaran->no_jurnal  = $jurnal['no_jurnal'];
+            $pembayaran->kode_akun  = $akunPembayaran->kode_akun;
+            $pembayaran->nama_akun  = $akunPembayaran->nama_akun;
+            $pembayaran->debet      = 0;
+            $pembayaran->kredit     = $props->nominal;
+            $pembayaran->save();
+
             /* COMMIT DB TRANSACTION */
             DB::commit();
 
@@ -116,6 +162,43 @@ class PembelianService extends BaseService
                 $pembelian->kode_akun_pembayaran    = $props['kode_akun_pembayaran'];
                 $pembelian->kode_user               = $this->returnAuthUser()->kode_user;
                 $pembelian->update();
+
+                /* REMOVE PREV JURNAL */
+                $this->jurnalModel::where('sumber', '=', $pembelian->kode_beli)->delete();
+
+                /* GET NO JURNAL */
+                $noJurnal = $this->jurnalService->createNoJurnal();
+
+                /* CREATE JURNAL */
+                $jurnal = new $this->jurnalModel;
+                $jurnal->no_jurnal          = $noJurnal;
+                $jurnal->tanggal_transaksi  = $props['tanggal'];
+                $jurnal->deskripsi          = $props['uraian'];
+                $jurnal->sumber             = $pembelian['kode_beli'];
+                $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
+                $jurnal->save();
+
+                /* PERSEDIAAN */
+                $akunPersediaan = $this->akunModel::where('kode_akun', '=', $props['kode_akun_persediaan'])->first();
+
+                $persediaan = new $this->detailModel;
+                $persediaan->no_jurnal  = $jurnal['no_jurnal'];
+                $persediaan->kode_akun  = $akunPersediaan->kode_akun;
+                $persediaan->nama_akun  = $akunPersediaan->nama_akun;
+                $persediaan->debet      = $props->nominal;
+                $persediaan->kredit     = 0;
+                $persediaan->save();
+
+                /* PEMBAYARAN */
+                $akunPembayaran = $this->akunModel::where('kode_akun', '=', $props['kode_akun_pembayaran'])->first();
+
+                $pembayaran = new $this->detailModel;
+                $pembayaran->no_jurnal  = $jurnal['no_jurnal'];
+                $pembayaran->kode_akun  = $akunPembayaran->kode_akun;
+                $pembayaran->nama_akun  = $akunPembayaran->nama_akun;
+                $pembayaran->debet      = 0;
+                $pembayaran->kredit     = $props->nominal;
+                $pembayaran->save();
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();
@@ -176,5 +259,28 @@ class PembelianService extends BaseService
         $newID  = 'PB-'.$year.''.substr("0000000$newID", -5);
 
         return $newID;
+    }
+
+    /* CHARTS PEMBELIAN */
+    public function charts(){
+        try {
+            $pendapatan = [];
+            $year = $this->carbon::now()->format('Y');
+            $data = [];
+            for ($x=1; $x <= 12; $x++) {
+                $data[] = $this->pembelianModel::selectRaw("$x AS month, IFNULL(SUM(nominal), 0) AS amount, 'Rupiah' AS unit")
+                            ->whereYear('tanggal', '=', $year)
+                            ->whereMonth('tanggal', '=', $x)
+                            ->first();
+            }
+
+            $pendapatan[] = [
+                'name'  => $year,
+                'data'  => $data
+            ];
+            return $pendapatan;
+        } catch (Exception $ex) {
+            throw $ex;
+        }
     }
 }

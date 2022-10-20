@@ -106,4 +106,15 @@ class PembelianController extends BaseController
             return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
         }
     }
+
+    public function charts(Request $request)
+    {
+        try {
+            $pembelian = $this->pembelianServices->charts();
+
+            return $this->returnResponse('success', self::HTTP_OK, 'Grafik pembelian', $pembelian);
+        } catch (Exception $ex) {
+            return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
+        }
+    }
 }
