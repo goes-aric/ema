@@ -73,12 +73,18 @@ class UserController extends BaseController
     {
         try {
             $rules = [
-                'nama'      => 'required|string|max:255',
-                'alamat'    => 'nullable',
-                'no_telp'   => 'nullable',
-                'username'  => 'required|string|max:255|alpha_dash|unique:users,username,'.$id.'',
-                'email'     => 'required|email|max:255|unique:users,email,'.$id.'',
-                'hak_akses' => 'required',
+                'nama'                  => 'required|string|max:255',
+                'alamat'                => 'nullable',
+                'no_telp'               => 'nullable',
+                'username'              => 'required|string|max:255|alpha_dash|unique:users,username,'.$id.'',
+                'email'                 => 'required|email|max:255|unique:users,email,'.$id.'',
+                'hak_akses'             => 'required',
+                'password'              => [
+                    'nullable', 'confirmed', Password::min(6)->letters()->mixedCase()->numbers()->symbols()->uncompromised()
+                ],
+                'password_confirmation'	=> [
+                    'nullable', Password::min(6)->letters()->mixedCase()->numbers()->symbols()->uncompromised()
+                ],
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {

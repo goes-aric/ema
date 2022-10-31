@@ -117,6 +117,14 @@ class UserService extends BaseService
                 $user->email        = $props['email'];
                 $user->username     = $props['username'];
                 $user->hak_akses    = $props['hak_akses'];
+
+                /* CHECK PASSWORD IS FILL OR NOT */
+                /* IF FILL OUT, UPDATE PASSWORD OTHERWISE SKIP */
+                if ($props['password']) {
+                    $user->password = bcrypt($props['password']);
+                }
+
+                /* UPDATE DATA */
                 $user->update();
 
                 /* COMMIT DB TRANSACTION */
