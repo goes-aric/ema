@@ -32,6 +32,18 @@ class PembelianService extends BaseService
     }
 
     /* FETCH ALL PEMBELIAN */
+    public function fetchAll($props){
+        /* GET DATA WITH FILTER AS A MODEL */
+        $datas = $this->dataFilterPagination($this->pembelianModel, $props, null);
+
+        /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
+        $datas = $datas->get();
+        $pembelian = PembelianResource::collection($datas);
+
+        return $pembelian;
+    }
+
+    /* FETCH ALL PEMBELIAN */
     public function fetchLimit($props){
         /* GET DATA FOR PAGINATION AS A MODEL */
         $getAllData = $this->dataFilterPagination($this->pembelianModel, [], null);

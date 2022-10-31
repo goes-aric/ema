@@ -17,6 +17,18 @@ class PenjualanController extends BaseController
         $this->moduleName = 'Penjualan';
     }
 
+    public function list(Request $request)
+    {
+        try {
+            $props = $this->getBaseQueryParams($request, []);
+            $penjualan = $this->penjualanServices->fetchAll($props);
+
+            return $this->returnResponse('success', self::HTTP_OK, 'Daftar penjualan', $penjualan);
+        } catch (Exception $ex) {
+            return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
+        }
+    }
+
     public function index(Request $request)
     {
         try {

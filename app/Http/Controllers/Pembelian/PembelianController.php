@@ -17,6 +17,18 @@ class PembelianController extends BaseController
         $this->moduleName = 'Pembelian';
     }
 
+    public function list(Request $request)
+    {
+        try {
+            $props = $this->getBaseQueryParams($request, []);
+            $pembelian = $this->pembelianServices->fetchAll($props);
+
+            return $this->returnResponse('success', self::HTTP_OK, 'Daftar pembelian', $pembelian);
+        } catch (Exception $ex) {
+            return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
+        }
+    }
+
     public function index(Request $request)
     {
         try {

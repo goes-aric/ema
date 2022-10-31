@@ -32,6 +32,18 @@ class PenjualanService extends BaseService
     }
 
     /* FETCH ALL PENJUALAN */
+    public function fetchAll($props){
+        /* GET DATA WITH FILTER AS A MODEL */
+        $datas = $this->dataFilterPagination($this->penjualanModel, $props, null);
+
+        /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
+        $datas = $datas->get();
+        $penjualan = PenjualanResource::collection($datas);
+
+        return $penjualan;
+    }
+
+    /* FETCH ALL PENJUALAN */
     public function fetchLimit($props){
         /* GET DATA FOR PAGINATION AS A MODEL */
         $getAllData = $this->dataFilterPagination($this->penjualanModel, [], null);
