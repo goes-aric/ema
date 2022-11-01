@@ -23,6 +23,18 @@ class JurnalService extends BaseService
     }
 
     /* FETCH ALL JURNAL */
+    public function fetchAll($props){
+        /* GET DATA WITH FILTER AS A MODEL */
+        $datas = $this->dataFilterPagination($this->jurnalModel, $props, null);
+
+        /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
+        $datas = $datas->get();
+        $jurnal = JurnalResource::collection($datas);
+
+        return $jurnal;
+    }
+
+    /* FETCH ALL JURNAL */
     public function fetchLimit($props){
         /* GET DATA FOR PAGINATION AS A MODEL */
         $getAllData = $this->dataFilterPagination($this->jurnalModel, [], null);

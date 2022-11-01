@@ -65,6 +65,7 @@ Route::middleware(['auth:api'])->group(function(){
 
     /* JURNAL UMUM */
     Route::controller(JurnalController::class)->group(function(){
+        Route::get('/jurnal/all', 'list')->name('jurnal.list');
         Route::get('/jurnal', 'index')->name('jurnal.index');
         Route::post('/jurnal', 'store')->name('jurnal.store');
         Route::get('/jurnal/{id}', 'show')->name('jurnal.show');

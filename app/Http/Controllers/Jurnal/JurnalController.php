@@ -17,6 +17,18 @@ class JurnalController extends BaseController
         $this->moduleName = 'Jurnal Umum';
     }
 
+    public function list(Request $request)
+    {
+        try {
+            $props = $this->getBaseQueryParams($request, []);
+            $jurnal = $this->jurnalServices->fetchAll($props);
+
+            return $this->returnResponse('success', self::HTTP_OK, 'Daftar jurnal umum', $jurnal);
+        } catch (Exception $ex) {
+            return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
+        }
+    }
+
     public function index(Request $request)
     {
         try {
