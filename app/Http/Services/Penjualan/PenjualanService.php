@@ -232,6 +232,9 @@ class PenjualanService extends BaseService
         try {
             $penjualan = $this->penjualanModel::find($id);
             if ($penjualan) {
+                /* DELETE JURNAL UMUM */
+                $this->jurnalModel::where('sumber', '=', $penjualan->kode_jual)->delete();
+
                 $penjualan->delete();
 
                 return null;
