@@ -97,6 +97,21 @@ class PenjualanService extends BaseService
         DB::beginTransaction();
 
         try {
+            /* IMAGE VARIABLE */
+            $imageName = null;
+            $imagePath = storage_path("app/public/images/");
+            $imageBinary = $props->file('gambar');
+
+            /* TRY TO UPLOAD IMAGE FIRST */
+            /* DECLARE NEW IMAGE VARIABLE */
+            $image = $props->file('gambar');
+            $newName = 'penjualan-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+            $uploadImage = $this->returnUploadImage($imagePath, $newName, $imageBinary);
+            if ($uploadImage['status'] == 'success') {
+                $imageName = $uploadImage['filename'];
+            }
+
+            /* GENERATE NEW ID */
             $newID = $this->createNoTransaksi();
 
             $penjualan = $this->penjualanModel;
@@ -106,6 +121,7 @@ class PenjualanService extends BaseService
             $penjualan->uraian                  = $props['uraian'];
             $penjualan->kode_akun_persediaan    = $props['kode_akun_persediaan'];
             $penjualan->kode_akun_penerimaan    = $props['kode_akun_penerimaan'];
+            $penjualan->gambar                  = $imageName;
             $penjualan->kode_user               = $this->returnAuthUser()->kode_user;
             $penjualan->save();
 
@@ -164,13 +180,34 @@ class PenjualanService extends BaseService
         try {
             $penjualan = $this->penjualanModel::find($id);
             if ($penjualan) {
+                /* IMAGE VARIABLE */
+                $imageName = $penjualan->gambar;
+                $imagePath = storage_path("app/public/images/");
+                $imageBinary = $props->file('gambar');
+
+                /* TRY TO UPLOAD IMAGE */
+                if (!empty($props->file('gambar'))) {
+                    // IF CURRENT IMAGE IS NOT EMPTY, DELETE CURRENT IMAGE
+                    if ($penjualan->gambar != null) {
+                        $this->returnDeleteFile($imagePath, $imageName);
+                    }
+
+                    /* DECLARE NEW IMAGE VARIABLE */
+                    $image = $props->file('gambar');
+                    $newName = 'penjualan-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+                    $uploadImage = $this->returnUploadImage($imagePath, $newName, $imageBinary);
+                    if ($uploadImage['status'] == 'success') {
+                        $imageName = $uploadImage['filename'];
+                    }
+                }
+
                 /* UPDATE PENJUALAN */
                 $penjualan->tanggal                 = $props['tanggal'];
                 $penjualan->nominal                 = $props['nominal'];
-
                 $penjualan->uraian                  = $props['uraian'];
                 $penjualan->kode_akun_persediaan    = $props['kode_akun_persediaan'];
                 $penjualan->kode_akun_penerimaan    = $props['kode_akun_penerimaan'];
+                $penjualan->gambar                  = $imageName;
                 $penjualan->kode_user               = $this->returnAuthUser()->kode_user;
                 $penjualan->update();
 

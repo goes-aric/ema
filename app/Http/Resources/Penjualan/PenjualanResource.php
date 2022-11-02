@@ -17,6 +17,7 @@ class PenjualanResource extends JsonResource
             'nama_akun_persediaan'  => $this->akunPersediaan->nama_akun,
             'kode_akun_penerimaan'  => $this->kode_akun_penerimaan,
             'nama_akun_penerimaan'  => $this->akunPenerimaan->nama_akun,
+            'gambar'                => $this->gambar ? asset('/storage/images') . '/' . $this->gambar : null,
             'kode_user'             => $this->createdUser->kode_user,
             'nama_user'             => $this->createdUser->nama ?? null
         ];
