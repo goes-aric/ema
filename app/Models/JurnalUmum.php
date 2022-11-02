@@ -16,6 +16,7 @@ class JurnalUmum extends BaseModel
             'tanggal_transaksi' => 10,
             'deskripsi' => 5,
             'sumber' => 5,
+            'gambar' => 5,
             'kode_user' => 5,
         ]
     ];
@@ -23,7 +24,7 @@ class JurnalUmum extends BaseModel
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-    	'no_jurnal', 'tanggal_transaksi', 'deskripsi', 'sumber', 'kode_user',
+    	'no_jurnal', 'tanggal_transaksi', 'deskripsi', 'sumber', 'gambar', 'kode_user',
     ];
 
     protected $table = 'jurnal_umum';

@@ -48,6 +48,7 @@ class JurnalController extends BaseController
                 'tanggal_transaksi' => 'required|date',
                 'deskripsi'         => 'required',
                 'sumber'            => 'nullable',
+                'gambar'            => 'required',
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {
@@ -78,6 +79,7 @@ class JurnalController extends BaseController
                 'tanggal_transaksi' => 'required|date',
                 'deskripsi'         => 'required',
                 'sumber'            => 'nullable',
+                'gambar'            => 'nullable',
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {

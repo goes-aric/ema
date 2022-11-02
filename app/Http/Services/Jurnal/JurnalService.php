@@ -88,6 +88,21 @@ class JurnalService extends BaseService
         DB::beginTransaction();
 
         try {
+            /* IMAGE VARIABLE */
+            $imageName = null;
+            $imagePath = storage_path("app/public/images/");
+            $imageBinary = $props->file('gambar');
+
+            /* TRY TO UPLOAD IMAGE FIRST */
+            /* DECLARE NEW IMAGE VARIABLE */
+            $image = $props->file('gambar');
+            $newName = 'jurnal-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+            $uploadImage = $this->returnUploadImage($imagePath, $newName, $imageBinary);
+            if ($uploadImage['status'] == 'success') {
+                $imageName = $uploadImage['filename'];
+            }
+
+            /* GENERATE NEW ID */
             $newID = $this->createNoJurnal();
 
             $jurnal = $this->jurnalModel;
@@ -95,6 +110,7 @@ class JurnalService extends BaseService
             $jurnal->tanggal_transaksi  = $props['tanggal_transaksi'];
             $jurnal->deskripsi          = $props['deskripsi'];
             $jurnal->sumber             = $props['sumber'];
+            $jurnal->gambar             = $imageName;
             $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
             $jurnal->save();
 
@@ -133,10 +149,32 @@ class JurnalService extends BaseService
         try {
             $jurnal = $this->jurnalModel::find($id);
             if ($jurnal) {
+                /* IMAGE VARIABLE */
+                $imageName = $jurnal->gambar;
+                $imagePath = storage_path("app/public/images/");
+                $imageBinary = $props->file('gambar');
+
+                /* TRY TO UPLOAD IMAGE */
+                if (!empty($props->file('gambar'))) {
+                    // IF CURRENT IMAGE IS NOT EMPTY, DELETE CURRENT IMAGE
+                    if ($jurnal->gambar != null) {
+                        $this->returnDeleteFile($imagePath, $imageName);
+                    }
+
+                    /* DECLARE NEW IMAGE VARIABLE */
+                    $image = $props->file('gambar');
+                    $newName = 'jurnal-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+                    $uploadImage = $this->returnUploadImage($imagePath, $newName, $imageBinary);
+                    if ($uploadImage['status'] == 'success') {
+                        $imageName = $uploadImage['filename'];
+                    }
+                }
+
                 /* UPDATE JURNAL */
                 $jurnal->tanggal_transaksi  = $props['tanggal_transaksi'];
                 $jurnal->deskripsi          = $props['deskripsi'];
                 $jurnal->sumber             = $props['sumber'];
+                $jurnal->gambar             = $imageName;
                 $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
                 $jurnal->update();
 
