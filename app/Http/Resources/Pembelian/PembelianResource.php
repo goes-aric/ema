@@ -18,6 +18,7 @@ class PembelianResource extends JsonResource
             'nama_akun_persediaan'  => $this->akunPersediaan->nama_akun,
             'kode_akun_pembayaran'  => $this->kode_akun_pembayaran,
             'nama_akun_pembayaran'  => $this->akunPembayaran->nama_akun,
+            'gambar'                => $this->gambar ? asset('/storage/images') . '/' . $this->gambar : null,
             'kode_user'             => $this->createdUser->kode_user,
             'nama_user'             => $this->createdUser->nama ?? null
         ];

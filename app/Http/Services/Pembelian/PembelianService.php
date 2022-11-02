@@ -97,6 +97,21 @@ class PembelianService extends BaseService
         DB::beginTransaction();
 
         try {
+            /* IMAGE VARIABLE */
+            $imageName = null;
+            $imagePath = storage_path("app/public/images/");
+            $imageBinary = $props->file('gambar');
+
+            /* TRY TO UPLOAD IMAGE FIRST */
+            /* DECLARE NEW IMAGE VARIABLE */
+            $image = $props->file('gambar');
+            $newName = 'pembelian-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+            $uploadImage = $this->returnUploadImage($imagePath, $newName, $imageBinary);
+            if ($uploadImage['status'] == 'success') {
+                $imageName = $uploadImage['filename'];
+            }
+
+            /* GENERATE NEW ID */
             $newID = $this->createNoTransaksi();
 
             $pembelian = $this->pembelianModel;
@@ -107,6 +122,7 @@ class PembelianService extends BaseService
             $pembelian->uraian                  = $props['uraian'];
             $pembelian->kode_akun_persediaan    = $props['kode_akun_persediaan'];
             $pembelian->kode_akun_pembayaran    = $props['kode_akun_pembayaran'];
+            $pembelian->gambar                  = $imageName;
             $pembelian->kode_user               = $this->returnAuthUser()->kode_user;
             $pembelian->save();
 
@@ -165,6 +181,27 @@ class PembelianService extends BaseService
         try {
             $pembelian = $this->pembelianModel::find($id);
             if ($pembelian) {
+                /* IMAGE VARIABLE */
+                $imageName = $pembelian->gambar;
+                $imagePath = storage_path("app/public/images/");
+                $imageBinary = $props->file('gambar');
+
+                /* TRY TO UPLOAD IMAGE */
+                if (!empty($props->file('gambar'))) {
+                    // IF CURRENT IMAGE IS NOT EMPTY, DELETE CURRENT IMAGE
+                    if ($pembelian->gambar != null) {
+                        $this->returnDeleteFile($imagePath, $imageName);
+                    }
+
+                    /* DECLARE NEW IMAGE VARIABLE */
+                    $image = $props->file('gambar');
+                    $newName = 'pembelian-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+                    $uploadImage = $this->returnUploadImage($imagePath, $newName, $imageBinary);
+                    if ($uploadImage['status'] == 'success') {
+                        $imageName = $uploadImage['filename'];
+                    }
+                }
+
                 /* UPDATE PEMBELIAN */
                 $pembelian->tanggal                 = $props['tanggal'];
                 $pembelian->nominal                 = $props['nominal'];
@@ -172,6 +209,7 @@ class PembelianService extends BaseService
                 $pembelian->uraian                  = $props['uraian'];
                 $pembelian->kode_akun_persediaan    = $props['kode_akun_persediaan'];
                 $pembelian->kode_akun_pembayaran    = $props['kode_akun_pembayaran'];
+                $pembelian->gambar                  = $imageName;
                 $pembelian->kode_user               = $this->returnAuthUser()->kode_user;
                 $pembelian->update();
 

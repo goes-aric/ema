@@ -19,6 +19,7 @@ class Pembelian extends BaseModel
             'uraian' => 5,
             'kode_akun_persediaan' => 5,
             'kode_akun_pembayaran' => 5,
+            'gambar' => 5,
             'kode_user' => 5,
         ]
     ];
@@ -26,7 +27,7 @@ class Pembelian extends BaseModel
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-    	'kode_beli', 'tanggal', 'nominal', 'metode_bayar', 'uraian', 'kode_akun_persediaan', 'kode_akun_pembayaran', 'kode_user',
+    	'kode_beli', 'tanggal', 'nominal', 'metode_bayar', 'uraian', 'kode_akun_persediaan', 'kode_akun_pembayaran', 'gambar', 'kode_user',
     ];
 
     protected $table = 'pembelian';
