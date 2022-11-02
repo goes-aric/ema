@@ -12,7 +12,7 @@ class Penjualan extends BaseModel
 
     protected $searchable = [
         'columns' => [
-            'kode_beli' => 10,
+            'kode_jual' => 10,
             'tanggal' => 10,
             'nominal' => 5,
             'uraian' => 5,
@@ -25,7 +25,7 @@ class Penjualan extends BaseModel
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-    	'kode_beli', 'tanggal', 'nominal', 'uraian', 'kode_akun_persediaan', 'kode_akun_penerimaan', 'kode_user',
+    	'kode_jual', 'tanggal', 'nominal', 'uraian', 'kode_akun_persediaan', 'kode_akun_penerimaan', 'kode_user',
     ];
 
     protected $table = 'penjualan';
