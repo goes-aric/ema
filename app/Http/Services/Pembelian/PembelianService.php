@@ -106,7 +106,7 @@ class PembelianService extends BaseService
             /* DECLARE NEW IMAGE VARIABLE */
             $image = $props->file('gambar');
             $newName = 'pembelian-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
-            $uploadImage = $this->returnUploadImage($imagePath, $newName, $imageBinary);
+            $uploadImage = $this->returnUploadFile($imagePath, $newName, $imageBinary);
             if ($uploadImage['status'] == 'success') {
                 $imageName = $uploadImage['filename'];
             }
@@ -196,7 +196,7 @@ class PembelianService extends BaseService
                     /* DECLARE NEW IMAGE VARIABLE */
                     $image = $props->file('gambar');
                     $newName = 'pembelian-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
-                    $uploadImage = $this->returnUploadImage($imagePath, $newName, $imageBinary);
+                    $uploadImage = $this->returnUploadFile($imagePath, $newName, $imageBinary);
                     if ($uploadImage['status'] == 'success') {
                         $imageName = $uploadImage['filename'];
                     }
