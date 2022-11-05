@@ -171,23 +171,20 @@ class BaseService
     }
 
     /* UPLOAD FILE FUNCTION */
-    protected function returnUploadFile($path, $props)
+    protected function returnUploadFile($path, $name, $fileBinary)
     {
         try {
             // IF FILE IMAGE NOT EMPTY, THEN UPLOAD IMAGE
-            $newName = "";
+            $newName = $name;
 
             /* CREATE VARIABLE WITH FILE AND STORE UPLOADED ORDER FILE */
-            $file = $props->file('file');
+            $file = $fileBinary;
 
             /* CHECK PATH IS EXISTS OR NOT */
             /* IF DOES NOT EXISTS, CREATE DIRECTORY */
             if (!File::isDirectory($path)) {
                 File::makeDirectory($path, 0777, true, true);
             }
-
-            /* GET ORIGINAL OF ORDER FILE NAME */
-            $newName = $file->getClientOriginalName();
 
             /* IF THE FILE EXISTS ON THE STORAGE, THEN CREATE NEW FILE NAME */
             if (Storage::exists($newName)) {
