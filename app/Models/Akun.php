@@ -31,4 +31,9 @@ class Akun extends BaseModel
     {
         return $this->belongsTo('App\Models\Akun', 'akun_utama', 'kode_akun');
     }
+
+    public function transaksi()
+    {
+        return $this->hasMany('App\Models\DetailJurnalUmum', 'kode_akun', 'kode_akun');
+    }
 }

@@ -15,6 +15,7 @@ class AkunResource extends JsonResource
             'induk'         => $this->akunInduk ?? null,
             'tipe_akun_id'  => $this->akunArray($this->tipe_akun),
             'tipe_akun'     => $this->tipe_akun,
+            'transaksi'     => $this->transaksi,
             'kode_user'     => $this->createdUser->kode_user,
             'nama_user'     => $this->createdUser->nama ?? null
         ];

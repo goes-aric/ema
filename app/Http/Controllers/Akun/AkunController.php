@@ -33,7 +33,7 @@ class AkunController extends BaseController
     {
         try {
             $rules = [
-                'kode_akun'		=> 'required|string|unique:akun',
+                'kode_akun'		=> 'required|max:150|unique:akun,kode_akun,NULL,id,deleted_at,NULL',
                 'nama_akun'     => 'required|string|max:255',
                 'akun_utama'    => 'nullable',
                 'tipe_akun'     => 'required',
@@ -64,7 +64,7 @@ class AkunController extends BaseController
     {
         try {
             $rules = [
-                'kode_akun'		=> 'required|string|unique:akun,kode_akun,'.$id.'',
+                'kode_akun'		=> 'required|max:150|unique:akun,kode_akun,'.$id.',id,deleted_at,NULL',
                 'nama_akun'     => 'required|string|max:255',
                 'akun_utama'    => 'nullable',
                 'tipe_akun'     => 'required',
