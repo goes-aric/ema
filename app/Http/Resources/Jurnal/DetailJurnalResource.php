@@ -13,7 +13,8 @@ class DetailJurnalResource extends JsonResource
             'kode_akun' => $this->kode_akun,
             'nama_akun' => $this->nama_akun,
             'debet'     => $this->debet,
-            'kredit'    => $this->kredit
+            'kredit'    => $this->kredit,
+            'jurnal'    => $this->jurnal
         ];
     }
 }

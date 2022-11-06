@@ -26,4 +26,9 @@ class DetailJurnalUmum extends BaseModel
     ];
 
     protected $table = 'detail_jurnal_umum';
+
+    public function jurnal()
+    {
+        return $this->belongsTo('App\Models\JurnalUmum', 'no_jurnal', 'no_jurnal');
+    }
 }
