@@ -6,6 +6,7 @@ use App\Http\Controllers\Akun\AkunController;
 use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Jurnal\JurnalController;
+use App\Http\Controllers\Laporan\NeracaController;
 use App\Http\Controllers\Jurnal\DetailJurnalController;
 use App\Http\Controllers\Pembelian\PembelianController;
 use App\Http\Controllers\Penjualan\PenjualanController;
@@ -82,6 +83,11 @@ Route::middleware(['auth:api'])->group(function(){
         Route::put('/detail-jurnal/{id}', 'update')->name('detail-jurnal.update');
         Route::delete('/detail-jurnal/{id}', 'destroy')->name('detail-jurnal.destroy');
         Route::delete('/detail-jurnal', 'destroyMultiple')->name('detail-jurnal.destroyMultiple');
+    });
+
+    /* DATA NERACA */
+    Route::controller(NeracaController::class)->group(function(){
+        Route::get('/neraca/data', 'dataAkun')->name('neraca.dataAkun');
     });
 
     /* USERS & LOGOUT */
