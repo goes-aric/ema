@@ -90,7 +90,7 @@ class JurnalService extends BaseService
         try {
             /* IMAGE VARIABLE */
             $imageName = null;
-            $imagePath = storage_path("app/public/images/");
+            $imagePath = 'images';
             $imageBinary = $props->file('gambar');
 
             /* TRY TO UPLOAD IMAGE FIRST */
@@ -151,7 +151,7 @@ class JurnalService extends BaseService
             if ($jurnal) {
                 /* IMAGE VARIABLE */
                 $imageName = $jurnal->gambar;
-                $imagePath = storage_path("app/public/images/");
+                $imagePath = 'images';
                 $imageBinary = $props->file('gambar');
 
                 /* TRY TO UPLOAD IMAGE */
