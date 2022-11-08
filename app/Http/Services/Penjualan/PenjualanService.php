@@ -99,7 +99,7 @@ class PenjualanService extends BaseService
         try {
             /* IMAGE VARIABLE */
             $imageName = null;
-            $imagePath = storage_path("app/public/images/");
+            $imagePath = 'images';
             $imageBinary = $props->file('gambar');
 
             /* TRY TO UPLOAD IMAGE FIRST */
@@ -182,7 +182,7 @@ class PenjualanService extends BaseService
             if ($penjualan) {
                 /* IMAGE VARIABLE */
                 $imageName = $penjualan->gambar;
-                $imagePath = storage_path("app/public/images/");
+                $imagePath = 'images';
                 $imageBinary = $props->file('gambar');
 
                 /* TRY TO UPLOAD IMAGE */
