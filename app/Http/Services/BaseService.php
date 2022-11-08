@@ -192,7 +192,12 @@ class BaseService
             }
 
             /* DO UPLOAD FILE TO STORAGE */
-            $file->move($path, $newName);
+            // $file->move($path, $newName);
+            $file->storeAs(
+                $path,
+                $newName,
+                'public'
+            );
 
             $response = [
                 'status'        => 'success',
