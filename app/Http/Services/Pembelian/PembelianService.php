@@ -99,7 +99,7 @@ class PembelianService extends BaseService
         try {
             /* IMAGE VARIABLE */
             $imageName = null;
-            $imagePath = storage_path("app/public/images/");
+            $imagePath = 'images';
             $imageBinary = $props->file('gambar');
 
             /* TRY TO UPLOAD IMAGE FIRST */
@@ -183,7 +183,7 @@ class PembelianService extends BaseService
             if ($pembelian) {
                 /* IMAGE VARIABLE */
                 $imageName = $pembelian->gambar;
-                $imagePath = storage_path("app/public/images/");
+                $imagePath = 'images';
                 $imageBinary = $props->file('gambar');
 
                 /* TRY TO UPLOAD IMAGE */
