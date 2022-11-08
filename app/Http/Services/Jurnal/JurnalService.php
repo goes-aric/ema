@@ -88,22 +88,22 @@ class JurnalService extends BaseService
         DB::beginTransaction();
 
         try {
+            /* GENERATE NEW ID */
+            $newID = $this->createNoJurnal();
+
             /* IMAGE VARIABLE */
             $imageName = null;
-            $imagePath = 'images';
+            $imagePath = storage_path("app/public/images/");
             $imageBinary = $props->file('gambar');
 
             /* TRY TO UPLOAD IMAGE FIRST */
             /* DECLARE NEW IMAGE VARIABLE */
             $image = $props->file('gambar');
-            $newName = 'jurnal-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+            $newName = 'jurnal-'.$newID.'.'. $image->getClientOriginalExtension();
             $uploadImage = $this->returnUploadFile($imagePath, $newName, $imageBinary);
             if ($uploadImage['status'] == 'success') {
                 $imageName = $uploadImage['filename'];
             }
-
-            /* GENERATE NEW ID */
-            $newID = $this->createNoJurnal();
 
             $jurnal = $this->jurnalModel;
             $jurnal->no_jurnal          = $newID;
@@ -151,7 +151,7 @@ class JurnalService extends BaseService
             if ($jurnal) {
                 /* IMAGE VARIABLE */
                 $imageName = $jurnal->gambar;
-                $imagePath = 'images';
+                $imagePath = storage_path("app/public/images/");
                 $imageBinary = $props->file('gambar');
 
                 /* TRY TO UPLOAD IMAGE */
@@ -163,7 +163,7 @@ class JurnalService extends BaseService
 
                     /* DECLARE NEW IMAGE VARIABLE */
                     $image = $props->file('gambar');
-                    $newName = 'jurnal-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+                    $newName = 'jurnal-'.$jurnal->no_jurnal.'.'. $image->getClientOriginalExtension();
                     $uploadImage = $this->returnUploadFile($imagePath, $newName, $imageBinary);
                     if ($uploadImage['status'] == 'success') {
                         $imageName = $uploadImage['filename'];

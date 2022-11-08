@@ -97,22 +97,22 @@ class PenjualanService extends BaseService
         DB::beginTransaction();
 
         try {
+            /* GENERATE NEW ID */
+            $newID = $this->createNoTransaksi();
+
             /* IMAGE VARIABLE */
             $imageName = null;
-            $imagePath = 'images';
+            $imagePath = storage_path("app/public/images/");
             $imageBinary = $props->file('gambar');
 
             /* TRY TO UPLOAD IMAGE FIRST */
             /* DECLARE NEW IMAGE VARIABLE */
             $image = $props->file('gambar');
-            $newName = 'penjualan-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+            $newName = 'penjualan-'.$newID.'.'. $image->getClientOriginalExtension();
             $uploadImage = $this->returnUploadFile($imagePath, $newName, $imageBinary);
             if ($uploadImage['status'] == 'success') {
                 $imageName = $uploadImage['filename'];
             }
-
-            /* GENERATE NEW ID */
-            $newID = $this->createNoTransaksi();
 
             $penjualan = $this->penjualanModel;
             $penjualan->kode_jual               = $newID;
@@ -182,7 +182,7 @@ class PenjualanService extends BaseService
             if ($penjualan) {
                 /* IMAGE VARIABLE */
                 $imageName = $penjualan->gambar;
-                $imagePath = 'images';
+                $imagePath = storage_path("app/public/images/");
                 $imageBinary = $props->file('gambar');
 
                 /* TRY TO UPLOAD IMAGE */
@@ -194,7 +194,7 @@ class PenjualanService extends BaseService
 
                     /* DECLARE NEW IMAGE VARIABLE */
                     $image = $props->file('gambar');
-                    $newName = 'penjualan-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+                    $newName = 'penjualan-'.$penjualan->kode_jual.'.'. $image->getClientOriginalExtension();
                     $uploadImage = $this->returnUploadFile($imagePath, $newName, $imageBinary);
                     if ($uploadImage['status'] == 'success') {
                         $imageName = $uploadImage['filename'];
