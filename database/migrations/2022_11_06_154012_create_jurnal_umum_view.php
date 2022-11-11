@@ -44,9 +44,46 @@ return new class extends Migration
                     FROM detail_jurnal_umum AS A
                     INNER JOIN jurnal_umum AS B ON A.no_jurnal = B.no_jurnal
                     INNER JOIN akun AS C ON A.kode_akun = C.kode_akun
+                    WHERE B.deleted_at IS NULL
                     GROUP BY B.tanggal_transaksi, A.kode_akun, A.nama_akun, C.akun_utama, C.tipe_akun, A.debet, A.kredit
-                ) tempTable
-                GROUP BY tanggal_transaksi, kode_akun, nama_akun, akun_utama, tipe_akun
+
+                    UNION ALL
+
+                    SELECT
+                        tanggal_transaksi,
+                        'XXX' AS kode_akun,
+                        'Laba Rugi Berjalan' AS nama_akun,
+                        'XXX' AS akun_utama,
+                        'EKUITAS' AS tipe_akun,
+                        IFNULL(SUM(debet), 0) AS debet,
+                        IFNULL(SUM(kredit), 0) AS kredit
+                    FROM
+                    (
+                        SELECT
+                            B.tanggal_transaksi,
+                            0 AS debet,
+                            (IFNULL(SUM(A.kredit), 0)-IFNULL(SUM(A.debet), 0)) AS kredit
+                        FROM detail_jurnal_umum AS A
+                        INNER JOIN jurnal_umum AS B ON A.no_jurnal = B.no_jurnal
+                        INNER JOIN akun AS C ON A.kode_akun = C.kode_akun
+                        WHERE C.tipe_akun = 'PENDAPATAN' AND B.deleted_at IS NULL
+                        GROUP BY B.tanggal_transaksi, A.kode_akun, A.nama_akun
+
+                        UNION ALL
+
+                        SELECT
+                            B.tanggal_transaksi,
+                            (IFNULL(SUM(A.debet), 0)-IFNULL(SUM(A.kredit), 0)) AS debet,
+                            0 AS kredit
+                        FROM detail_jurnal_umum AS A
+                        INNER JOIN jurnal_umum AS B ON A.no_jurnal = B.no_jurnal
+                        INNER JOIN akun AS C ON A.kode_akun = C.kode_akun
+                        WHERE C.tipe_akun = 'BEBAN' AND B.deleted_at IS NULL
+                        GROUP BY B.tanggal_transaksi, A.kode_akun, A.nama_akun
+                    ) AS TEMP
+                    GROUP BY tanggal_transaksi
+                ) AS tempTable
+                GROUP BY tanggal_transaksi, kode_akun, nama_akun, akun_utama, tipe_akun;
         ";
     }
 

@@ -29,8 +29,13 @@ class NeracaService extends BaseService
         foreach ($akun as $item) {
             $transaksi = $this->viewJurnalModel::where('akun_utama', '=', $item->kode_akun)
                             ->where('tanggal_transaksi', '>=', $this->returnDateOnly($props['start']))
-                            ->where('tanggal_transaksi', '<=', $this->returnDateOnly($props['end']))
-                            ->get();
+                            ->where('tanggal_transaksi', '<=', $this->returnDateOnly($props['end']));
+
+            if ($item->tipe_akun == 'EKUITAS') {
+                $transaksi->orWhere('akun_utama', '=', 'XXX');
+            }
+            $transaksi = $transaksi->orderBy('kode_akun')->get();
+
             $item->transaksi = $transaksi;
         }
 
