@@ -99,10 +99,9 @@ Route::middleware(['auth:api'])->group(function(){
     });
 
     /* DATA PERUBAHAN MODAL */
-    // Route::controller(PerubahanModalController::class)->group(function(){
-    //     Route::get('/perubahan-modal/data-sebelumnya', 'dataPrevious')->name('labaRugi.dataPrevious');
-    //     Route::get('/perubahan-modal/data-sekarang', 'dataCurrent')->name('labaRugi.dataCurrent');
-    // });
+    Route::controller(PerubahanModalController::class)->group(function(){
+        Route::get('/perubahan-modal/data', 'dataAkun')->name('perubahanModal.dataAkun');
+    });
 
     /* USERS & LOGOUT */
     Route::controller(UserController::class)->group(function(){
