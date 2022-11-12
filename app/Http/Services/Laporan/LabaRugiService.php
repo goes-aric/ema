@@ -3,8 +3,6 @@ namespace App\Http\Services\Laporan;
 
 use Exception;
 use App\Models\Akun;
-use App\Models\Laporan;
-use App\Models\DetailLaporan;
 use App\Models\ViewJurnalUmum;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
@@ -14,16 +12,12 @@ class LabaRugiService extends BaseService
     /* PRIVATE VARIABLE */
     private $akunModel;
     private $viewJurnalModel;
-    private $laporanModel;
-    private $laporanDetailModel;
     private $carbon;
 
     public function __construct()
     {
         $this->akunModel = new Akun();
         $this->viewJurnalModel = new ViewJurnalUmum();
-        $this->laporanModel = new Laporan();
-        $this->laporanDetailModel = new DetailLaporan();
         $this->carbon = $this->returnCarbon();
     }
 
