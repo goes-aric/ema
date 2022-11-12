@@ -51,7 +51,7 @@ class PembelianController extends BaseController
                 'uraian'                => 'nullable',
                 'kode_akun_persediaan'  => 'required',
                 'kode_akun_pembayaran'  => 'required',
-                'gambar'                => 'required',
+                'gambar'                => 'nullable',
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {
