@@ -7,9 +7,12 @@ use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Jurnal\JurnalController;
 use App\Http\Controllers\Laporan\NeracaController;
+use App\Http\Controllers\Laporan\LabaRugiController;
+use App\Http\Services\Laporan\PerubahanModalService;
 use App\Http\Controllers\Jurnal\DetailJurnalController;
 use App\Http\Controllers\Pembelian\PembelianController;
 use App\Http\Controllers\Penjualan\PenjualanController;
+use App\Http\Controllers\Laporan\PerubahanModalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,6 +92,17 @@ Route::middleware(['auth:api'])->group(function(){
     Route::controller(NeracaController::class)->group(function(){
         Route::get('/neraca/data', 'dataAkun')->name('neraca.dataAkun');
     });
+
+    /* DATA LABA RUGI */
+    Route::controller(LabaRugiController::class)->group(function(){
+        Route::get('/laba-rugi/data', 'dataLabaRugi')->name('labaRugi.dataLabaRugi');
+    });
+
+    /* DATA PERUBAHAN MODAL */
+    // Route::controller(PerubahanModalController::class)->group(function(){
+    //     Route::get('/perubahan-modal/data-sebelumnya', 'dataPrevious')->name('labaRugi.dataPrevious');
+    //     Route::get('/perubahan-modal/data-sekarang', 'dataCurrent')->name('labaRugi.dataCurrent');
+    // });
 
     /* USERS & LOGOUT */
     Route::controller(UserController::class)->group(function(){
