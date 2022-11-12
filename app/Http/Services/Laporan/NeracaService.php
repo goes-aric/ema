@@ -32,21 +32,23 @@ class NeracaService extends BaseService
             if ($item->tipe_akun == 'EKUITAS') {
                 $transaksiSebelumnya->orWhere('akun_utama', '=', 'XXX');
             }
-            $transaksiSebelumnya = $transaksiSebelumnya->where('tanggal_transaksi', '<', $this->returnDateOnly($props['start']));
-            $transaksiSebelumnya = $transaksiSebelumnya->orderBy('kode_akun');
+            $transaksiSebelumnya->where('tanggal_transaksi', '<', $this->returnDateOnly($props['start']))
+                                ->orderBy('kode_akun');
 
             /* TRANSAKSI PER PERIODE */
             $transaksi = $this->viewJurnalModel::where('akun_utama', '=', $item->kode_akun);
             if ($item->tipe_akun == 'EKUITAS') {
                 $transaksi->orWhere('akun_utama', '=', 'XXX');
             }
-            $transaksi = $transaksi->where('tanggal_transaksi', '>=', $this->returnDateOnly($props['start']))
-                            ->where('tanggal_transaksi', '<=', $this->returnDateOnly($props['end']));
-            $transaksi = $transaksi->orderBy('kode_akun')
-                            ->union($transaksiSebelumnya)
+            $transaksi->where('tanggal_transaksi', '>=', $this->returnDateOnly($props['start']))
+                        ->where('tanggal_transaksi', '<=', $this->returnDateOnly($props['end']))
+                        ->orderBy('kode_akun');
+
+            $unionData = $transaksi->union($transaksiSebelumnya)
+                            ->orderBy('kode_akun')
                             ->get();
 
-            $item->transaksi = $transaksi;
+            $item->transaksi = $unionData;
         }
 
         return $akun;
