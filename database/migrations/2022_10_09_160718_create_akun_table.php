@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('akun_utama', 150)->nullable();
             $table->string('tipe_akun', 255);
             $table->string('kode_user', 150);
+            $table->boolean('arus_kas')->nullable();
+            $table->string('arus_kas_tipe', 255)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -7,6 +7,7 @@ use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Jurnal\JurnalController;
 use App\Http\Controllers\Laporan\NeracaController;
+use App\Http\Controllers\Laporan\ArusKasController;
 use App\Http\Controllers\Laporan\LabaRugiController;
 use App\Http\Services\Laporan\PerubahanModalService;
 use App\Http\Controllers\Jurnal\DetailJurnalController;
@@ -101,6 +102,11 @@ Route::middleware(['auth:api'])->group(function(){
     /* DATA PERUBAHAN MODAL */
     Route::controller(PerubahanModalController::class)->group(function(){
         Route::get('/perubahan-modal/data', 'dataAkun')->name('perubahanModal.dataAkun');
+    });
+
+    /* DATA ARUS KAS */
+    Route::controller(ArusKasController::class)->group(function(){
+        Route::get('/arus-kas/data', 'dataAkun')->name('arusKas.dataAkun');
     });
 
     /* USERS & LOGOUT */
