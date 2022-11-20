@@ -76,6 +76,8 @@ class AkunService extends BaseService
             $akun->nama_akun    = $props['nama_akun'];
             $akun->akun_utama   = $props['akun_utama'];
             $akun->tipe_akun    = $props['tipe_akun'];
+            $akun->arus_kas     = $props['setara_kas'];
+            $akun->arus_kas_tipe= $props['arus_kas_tipe'];            
             $akun->kode_user    = $this->returnAuthUser()->kode_user;
             $akun->save();
 
@@ -105,6 +107,8 @@ class AkunService extends BaseService
                 $akun->nama_akun    = $props['nama_akun'];
                 $akun->akun_utama   = $props['akun_utama'];
                 $akun->tipe_akun    = $props['tipe_akun'];
+                $akun->arus_kas     = $props['setara_kas'];
+                $akun->arus_kas_tipe= $props['arus_kas_tipe'];
                 $akun->kode_user    = $this->returnAuthUser()->kode_user;
                 $akun->update();
 
