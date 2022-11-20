@@ -233,20 +233,20 @@ class PenjualanService extends BaseService
                 $persediaan->no_jurnal  = $jurnal['no_jurnal'];
                 $persediaan->kode_akun  = $akunPersediaan->kode_akun;
                 $persediaan->nama_akun  = $akunPersediaan->nama_akun;
-                $persediaan->debet      = $props->nominal;
-                $persediaan->kredit     = 0;
+                $persediaan->debet      = 0;
+                $persediaan->kredit     = $props->nominal;
                 $persediaan->save();
 
                 /* PENERIMAAN */
                 $akunPenerimaan = $this->akunModel::where('kode_akun', '=', $props['kode_akun_penerimaan'])->first();
 
-                $pembayaran = new $this->detailModel;
-                $pembayaran->no_jurnal  = $jurnal['no_jurnal'];
-                $pembayaran->kode_akun  = $akunPenerimaan->kode_akun;
-                $pembayaran->nama_akun  = $akunPenerimaan->nama_akun;
-                $pembayaran->debet      = 0;
-                $pembayaran->kredit     = $props->nominal;
-                $pembayaran->save();
+                $penerimaan = new $this->detailModel;
+                $penerimaan->no_jurnal  = $jurnal['no_jurnal'];
+                $penerimaan->kode_akun  = $akunPenerimaan->kode_akun;
+                $penerimaan->nama_akun  = $akunPenerimaan->nama_akun;
+                $penerimaan->debet      = $props->nominal;
+                $penerimaan->kredit     = 0;
+                $penerimaan->save();
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();
