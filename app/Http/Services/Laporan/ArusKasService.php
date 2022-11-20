@@ -32,7 +32,7 @@ class ArusKasService extends BaseService
                 'saldo_awal'=> []
             ],
             [
-                'id'      => 'inventasi',
+                'id'      => 'investasi',
                 'name'    => 'Arus Kas dari Aktivitas Inventasi',
                 'transaksi' => [],
                 'saldo_awal'=> []
