@@ -35,6 +35,7 @@ return new class extends Migration
                 FROM (
                     SELECT
                         B.tanggal_transaksi,
+                        A.no_jurnal,
                         A.kode_akun,
                         A.nama_akun,
                         C.akun_utama,
@@ -46,12 +47,13 @@ return new class extends Migration
                     INNER JOIN jurnal_umum AS B ON A.no_jurnal = B.no_jurnal
                     INNER JOIN akun AS C ON A.kode_akun = C.kode_akun
                     WHERE B.deleted_at IS NULL
-                    GROUP BY B.tanggal_transaksi, A.kode_akun, A.nama_akun, C.akun_utama, C.tipe_akun, arus_kas_tipe, A.debet, A.kredit
+                    GROUP BY B.tanggal_transaksi, A.no_jurnal, A.kode_akun, A.nama_akun, C.akun_utama, C.tipe_akun, C.arus_kas_tipe, A.debet, A.kredit
 
                     UNION ALL
 
                     SELECT
                         tanggal_transaksi,
+                        'XXX' AS no_jurnal,
                         'XXX' AS kode_akun,
                         'Laba Rugi Berjalan' AS nama_akun,
                         'XXX' AS akun_utama,
