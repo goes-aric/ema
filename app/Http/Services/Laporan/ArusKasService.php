@@ -46,9 +46,9 @@ class ArusKasService extends BaseService
         ];
 
         foreach ($tipeArusKas as $index => $item) {
-            $akun = $this->akunModel::selectRaw('kode_akun, nama_akun, akun_utama, tipe_akun, arus_kas_tipe, 0 AS saldo')
-                        ->where('arus_kas_tipe', '=', $item['id'])
-                        ->orderBy('kode_akun');
+            // $akun = $this->akunModel::selectRaw('kode_akun, nama_akun, akun_utama, tipe_akun, arus_kas_tipe, 0 AS saldo')
+            //             ->where('arus_kas_tipe', '=', $item['id'])
+            //             ->orderBy('kode_akun');
 
             /* TRANSAKSI PER PERIODE */
             $transaksi = $this->viewJurnalModel::selectRaw("kode_akun, nama_akun, akun_utama, tipe_akun, arus_kas_tipe, IF((tipe_akun = 'AKTIVA' or tipe_akun = 'BEBAN'), -(debet-kredit), (kredit-debet)) AS saldo")
@@ -57,11 +57,11 @@ class ArusKasService extends BaseService
                             ->where('tanggal_transaksi', '<=', $this->returnDateOnly($props['end']))
                             ->orderBy('kode_akun');
 
-            $unionData = $transaksi->union($akun)
-                            ->orderBy('kode_akun')
-                            ->get();
+            // $unionData = $transaksi->union($akun)
+            //                 ->orderBy('kode_akun')
+            //                 ->get();         
 
-            $tipeArusKas[$index]['transaksi'] = $unionData;
+            $tipeArusKas[$index]['transaksi'] = $transaksi->get();
 
             /* SALDO AWAL */
             $saldoAwal = $this->viewJurnalModel::selectRaw("kode_akun, nama_akun, akun_utama, tipe_akun, arus_kas_tipe, IF((tipe_akun = 'AKTIVA' or tipe_akun = 'BEBAN'), -(debet-kredit), (kredit-debet)) AS saldo")
