@@ -28,21 +28,29 @@ class NeracaService extends BaseService
 
         foreach ($akun as $item) {
             /* TRANSAKSI SEBELUM PERIODE */
-            $transaksiSebelumnya = $this->viewJurnalModel::where('akun_utama', '=', $item->kode_akun);
+            $transaksiSebelumnya = $this->viewJurnalModel::where('tanggal_transaksi', '<', $this->returnDateOnly($props['start']));
             if ($item->tipe_akun == 'EKUITAS') {
-                $transaksiSebelumnya->orWhere('akun_utama', '=', 'XXX');
+                $transaksiSebelumnya->where(function($query) use($item){
+                    $query->where('akun_utama', '=', $item->kode_akun)
+                            ->orWhere('akun_utama', '=', 'XXX');
+                });
+            } else {
+                $transaksiSebelumnya->where('akun_utama', '=', $item->kode_akun);
             }
-            $transaksiSebelumnya->where('tanggal_transaksi', '<', $this->returnDateOnly($props['start']))
-                                ->orderBy('kode_akun');
+            $transaksiSebelumnya->orderBy('kode_akun');
 
             /* TRANSAKSI PER PERIODE */
-            $transaksi = $this->viewJurnalModel::where('akun_utama', '=', $item->kode_akun);
+            $transaksi = $this->viewJurnalModel::where('tanggal_transaksi', '>=', $this->returnDateOnly($props['start']))
+                                                ->where('tanggal_transaksi', '<=', $this->returnDateOnly($props['end']));
             if ($item->tipe_akun == 'EKUITAS') {
-                $transaksi->orWhere('akun_utama', '=', 'XXX');
+                $transaksi->where(function($query) use($item){
+                    $query->where('akun_utama', '=', $item->kode_akun)
+                            ->orWhere('akun_utama', '=', 'XXX');
+                });
+            } else {
+                $transaksi->where('akun_utama', '=', $item->kode_akun);
             }
-            $transaksi->where('tanggal_transaksi', '>=', $this->returnDateOnly($props['start']))
-                        ->where('tanggal_transaksi', '<=', $this->returnDateOnly($props['end']))
-                        ->orderBy('kode_akun');
+            $transaksi->orderBy('kode_akun');
 
             $unionData = $transaksi->union($transaksiSebelumnya)
                             ->orderBy('kode_akun')
