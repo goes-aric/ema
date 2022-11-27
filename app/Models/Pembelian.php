@@ -4,11 +4,12 @@ namespace App\Models;
 
 use App\Models\BaseModel;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
+// use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Pembelian extends BaseModel
 {
-    use Notifiable, SoftDeletes;
+    // use Notifiable, SoftDeletes;
+    use Notifiable;
 
     protected $searchable = [
         'columns' => [
