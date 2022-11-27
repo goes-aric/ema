@@ -134,6 +134,7 @@ class PenjualanService extends BaseService
             $jurnal->tanggal_transaksi  = $props['tanggal'];
             $jurnal->deskripsi          = $props['uraian'];
             $jurnal->sumber             = $newID;
+            $jurnal->gambar             = $imageName;
             $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
             $jurnal->save();
 
@@ -223,6 +224,7 @@ class PenjualanService extends BaseService
                 $jurnal->tanggal_transaksi  = $props['tanggal'];
                 $jurnal->deskripsi          = $props['uraian'];
                 $jurnal->sumber             = $penjualan['kode_jual'];
+                $jurnal->gambar             = $imageName;
                 $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
                 $jurnal->save();
 
