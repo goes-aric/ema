@@ -213,6 +213,9 @@ class JurnalService extends BaseService
         try {
             $jurnal = $this->jurnalModel::find($id);
             if ($jurnal) {
+                /* DELETE DETAIL JURNAL */
+                $this->detailModel::where('no_jurnal', '=', $jurnal['no_jurnal'])->delete();
+
                 $jurnal->delete();
 
                 return null;

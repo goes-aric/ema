@@ -274,8 +274,12 @@ class PembelianService extends BaseService
             $pembelian = $this->pembelianModel::find($id);
             if ($pembelian) {
                 /* DELETE JURNAL UMUM */
-                $this->jurnalModel::where('sumber', '=', $pembelian->kode_beli)->delete();
+                $jurnal = $this->jurnalModel::where('sumber', '=', $pembelian->kode_beli)->first();
 
+                /* DELETE DETAIL JURNAL */
+                $this->detailModel::where('no_jurnal', '=', $jurnal['no_jurnal'])->delete();
+
+                $jurnal->delete();
                 $pembelian->delete();
 
                 return null;
