@@ -13,15 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('penjualan', function (Blueprint $table) {
+        Schema::create('barang', function (Blueprint $table) {
             $table->id();
-            $table->string('no_transaksi', 150);
-            $table->date('tanggal');
-            $table->decimal('total', 20,2)->default(0);
-            $table->decimal('diskon', 20,2)->default(0);
-            $table->decimal('grand_total', 20,2)->default(0);
-            $table->text('catatan')->nullable();
-            $table->string('gambar', 255)->nullable();
+            $table->string('kode_barang', 50);
+            $table->string('nama_barang', 255);
+            $table->string('satuan', 100);
+            $table->decimal('harga_beli', 20,2)->nullable();
+            $table->decimal('harga_jual', 20,2);
+            $table->boolean('status');
+            $table->boolean('status_digunakan')->default(0);
             $table->bigInteger('id_user')->unsigned();
             $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
@@ -36,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('penjualan');
+        Schema::dropIfExists('barang');
     }
 };

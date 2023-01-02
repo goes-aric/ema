@@ -18,20 +18,20 @@ class JurnalUmum extends BaseModel
             'deskripsi' => 5,
             'sumber' => 5,
             'gambar' => 5,
-            'kode_user' => 5,
+            'id_user' => 5,
         ]
     ];
 
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-    	'no_jurnal', 'tanggal_transaksi', 'deskripsi', 'sumber', 'gambar', 'kode_user',
+    	'no_jurnal', 'tanggal_transaksi', 'deskripsi', 'sumber', 'gambar', 'id_user',
     ];
 
     protected $table = 'jurnal_umum';
 
     public function details()
     {
-        return $this->hasMany('App\Models\DetailJurnalUmum', 'no_jurnal', 'no_jurnal');
+        return $this->hasMany('App\Models\JurnalUmumDetail', 'id_jurnal_umum', 'id');
     }
 }

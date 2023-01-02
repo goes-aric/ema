@@ -30,6 +30,7 @@ RUN groupmod --gid $GID $UGROUP
 # MAKE SURE APT IS UP TO DATE
 RUN apt-get update
 RUN apt-get install -y curl
+RUN apt-get update
 RUN apt-get install -y build-essential libssl-dev zlib1g-dev libpng-dev libjpeg-dev libfreetype6-dev libwebp-dev
 
 ENV NVM_DIR /usr/local/nvm
@@ -49,6 +50,7 @@ ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 WORKDIR /var/www/html
 
 # INSTALL GIT
+RUN apt-get update
 RUN apt-get install -y git
 
 # INSTALL SUPERVISOR

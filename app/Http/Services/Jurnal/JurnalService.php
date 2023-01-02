@@ -6,7 +6,7 @@ use App\Models\JurnalUmum;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\Jurnal\JurnalResource;
-use App\Models\DetailJurnalUmum;
+use App\Models\JurnalUmumDetail;
 
 class JurnalService extends BaseService
 {
@@ -18,7 +18,7 @@ class JurnalService extends BaseService
     public function __construct()
     {
         $this->jurnalModel = new JurnalUmum();
-        $this->detailModel = new DetailJurnalUmum();
+        $this->detailModel = new JurnalUmumDetail();
         $this->carbon = $this->returnCarbon();
     }
 
@@ -89,7 +89,7 @@ class JurnalService extends BaseService
 
         try {
             /* GENERATE NEW ID */
-            $newID = $this->createNoJurnal();
+            $newID = $this->checkNumberExists($props['no_jurnal']) ? $this->createNoJurnal() : $props['no_jurnal'];
 
             /* IMAGE VARIABLE */
             $imageName = null;
@@ -111,20 +111,21 @@ class JurnalService extends BaseService
             $jurnal->deskripsi          = $props['deskripsi'];
             $jurnal->sumber             = $props['sumber'];
             $jurnal->gambar             = $imageName;
-            $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
+            $jurnal->id_user            = $this->returnAuthUser()->id;
             $jurnal->save();
 
             /* REMOVE PREV DETAILS */
-            $this->detailModel::where('no_jurnal', '=', $jurnal['no_jurnal'])->delete();
+            $this->detailModel::where('id_jurnal_umum', '=', $jurnal['id'])->delete();
 
             /* DETAILS */
             foreach (json_decode($props['jurnal']) as $item) {
                 $detail = new $this->detailModel;
-                $detail->no_jurnal  = $jurnal['no_jurnal'];
-                $detail->kode_akun  = $item->kode_akun;
-                $detail->nama_akun  = $item->nama_akun;
-                $detail->debet      = $item->debet;
-                $detail->kredit     = $item->kredit;
+                $detail->id_jurnal_umum = $jurnal['id'];
+                $detail->id_akun        = $item->id_akun;
+                $detail->kode_akun      = $item->kode_akun;
+                $detail->nama_akun      = $item->nama_akun;
+                $detail->debet          = $item->debet;
+                $detail->kredit         = $item->kredit;
                 $detail->save();
             }
 
@@ -175,20 +176,21 @@ class JurnalService extends BaseService
                 $jurnal->deskripsi          = $props['deskripsi'];
                 $jurnal->sumber             = $props['sumber'];
                 $jurnal->gambar             = $imageName;
-                $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
+                $jurnal->id_user            = $this->returnAuthUser()->id;
                 $jurnal->update();
 
                 /* REMOVE PREV DETAILS */
-                $this->detailModel::where('no_jurnal', '=', $jurnal['no_jurnal'])->delete();
+                $this->detailModel::where('id_jurnal_umum', '=', $jurnal['id'])->delete();
 
                 /* DETAILS */
                 foreach (json_decode($props['jurnal']) as $item) {
                     $detail = new $this->detailModel;
-                    $detail->no_jurnal  = $jurnal['no_jurnal'];
-                    $detail->kode_akun  = $item->kode_akun;
-                    $detail->nama_akun  = $item->nama_akun;
-                    $detail->debet      = $item->debet;
-                    $detail->kredit     = $item->kredit;
+                    $detail->id_jurnal_umum = $jurnal['id'];
+                    $detail->id_akun        = $item->id_akun;
+                    $detail->kode_akun      = $item->kode_akun;
+                    $detail->nama_akun      = $item->nama_akun;
+                    $detail->debet          = $item->debet;
+                    $detail->kredit         = $item->kredit;
                     $detail->save();
                 }
 
@@ -213,9 +215,6 @@ class JurnalService extends BaseService
         try {
             $jurnal = $this->jurnalModel::find($id);
             if ($jurnal) {
-                /* DELETE DETAIL JURNAL */
-                $this->detailModel::where('no_jurnal', '=', $jurnal['no_jurnal'])->delete();
-
                 $jurnal->delete();
 
                 return null;
@@ -254,5 +253,12 @@ class JurnalService extends BaseService
         $newID  = 'JU-'.$year.''.substr("0000000$newID", -5);
 
         return $newID;
+    }
+
+    /* CHECK INV NUMBER EXISTS */
+    public function checkNumberExists($number){
+        $exists = $this->jurnalModel::where('no_jurnal', '=', $number)->exists();
+
+        return $exists;
     }
 }

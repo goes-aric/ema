@@ -45,13 +45,15 @@ class PembelianController extends BaseController
     {
         try {
             $rules = [
-                'tanggal'		        => 'required|date',
-                'nominal'               => 'required|numeric',
-                'metode_bayar'          => 'required',
-                'uraian'                => 'nullable',
-                'kode_akun_persediaan'  => 'required',
-                'kode_akun_pembayaran'  => 'required',
-                'gambar'                => 'nullable',
+                'no_transaksi'  => 'required',
+                'tanggal'       => 'required|date',
+                'metode_bayar'  => 'required',
+                'supplier'      => 'required',
+                'total'         => 'required|numeric',
+                'diskon'        => 'required|numeric',
+                'grand_total'   => 'required|numeric',
+                'gambar'        => 'nullable',
+                'catatan'       => 'nullable',
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {
@@ -79,13 +81,14 @@ class PembelianController extends BaseController
     {
         try {
             $rules = [
-                'tanggal'		        => 'required|date',
-                'nominal'               => 'required|numeric',
-                'metode_bayar'          => 'required',
-                'uraian'                => 'nullable',
-                'kode_akun_persediaan'  => 'required',
-                'kode_akun_pembayaran'  => 'required',
-                'gambar'                => 'nullable',
+                'tanggal'       => 'required|date',
+                'metode_bayar'  => 'required',
+                'supplier'      => 'required',
+                'total'         => 'required|numeric',
+                'diskon'        => 'required|numeric',
+                'grand_total'   => 'required|numeric',
+                'gambar'        => 'nullable',
+                'catatan'       => 'nullable',
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {
@@ -116,6 +119,16 @@ class PembelianController extends BaseController
             $pembelian = $this->pembelianServices->destroyMultiplePembelian($props);
 
             return $this->returnResponse('success', self::HTTP_OK, 'Pembelian berhasil dihapus!', $pembelian);
+        } catch (Exception $ex) {
+            return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
+        }
+    }
+
+    public function getInvoiceNumber()
+    {
+        try {
+            $pembelian = $this->pembelianServices->createNoTransaksi();
+            return $this->returnResponse('success', self::HTTP_OK, 'No Invoice', $pembelian);
         } catch (Exception $ex) {
             return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
         }

@@ -19,7 +19,8 @@ return new class extends Migration
             $table->string('nama_akun', 255);
             $table->string('akun_utama', 150)->nullable();
             $table->string('tipe_akun', 255);
-            $table->string('kode_user', 150);
+            $table->bigInteger('id_user')->unsigned();
+            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->boolean('arus_kas')->nullable();
             $table->string('arus_kas_tipe', 255)->nullable();
             $table->timestamps();

@@ -15,14 +15,18 @@ return new class extends Migration
     {
         Schema::create('pembelian', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_beli', 150);
+            $table->string('no_transaksi', 150);
             $table->date('tanggal');
-            $table->decimal('nominal',12,2);
-            $table->string('metode_bayar', 50)->comment('TUNAI/KREDIT');
-            $table->text('uraian')->nullable();
-            $table->string('kode_akun_persediaan', 150);
-            $table->string('kode_akun_pembayaran', 150);
-            $table->string('kode_user', 150);
+            $table->string('metode_bayar', 50)->default('TUNAI')->comment('TUNAI/KREDIT');
+            $table->bigInteger('id_supplier')->unsigned()->nullable();
+            $table->foreign('id_supplier')->references('id')->on('supplier')->onDelete('cascade');
+            $table->decimal('total', 20,2)->default(0);
+            $table->decimal('diskon', 20,2)->default(0);
+            $table->decimal('grand_total', 20,2)->default(0);
+            $table->text('catatan')->nullable();
+            $table->string('gambar', 255)->nullable();
+            $table->bigInteger('id_user')->unsigned();
+            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });

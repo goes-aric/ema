@@ -35,7 +35,7 @@ return new class extends Migration
                 FROM (
                     SELECT
                         B.tanggal_transaksi,
-                        A.no_jurnal,
+                        B.no_jurnal,
                         A.kode_akun,
                         A.nama_akun,
                         C.akun_utama,
@@ -43,11 +43,11 @@ return new class extends Migration
                         C.arus_kas_tipe,
                         A.debet,
                         A.kredit
-                    FROM detail_jurnal_umum AS A
-                    INNER JOIN jurnal_umum AS B ON A.no_jurnal = B.no_jurnal
-                    INNER JOIN akun AS C ON A.kode_akun = C.kode_akun
+                    FROM jurnal_umum_detail AS A
+                    INNER JOIN jurnal_umum AS B ON A.id_jurnal_umum = B.id
+                    INNER JOIN akun AS C ON A.id_akun = C.id
                     WHERE B.deleted_at IS NULL
-                    GROUP BY B.tanggal_transaksi, A.no_jurnal, A.kode_akun, A.nama_akun, C.akun_utama, C.tipe_akun, C.arus_kas_tipe, A.debet, A.kredit
+                    GROUP BY B.tanggal_transaksi, B.no_jurnal, A.kode_akun, A.nama_akun, C.akun_utama, C.tipe_akun, C.arus_kas_tipe, A.debet, A.kredit
 
                     UNION ALL
 
@@ -67,9 +67,9 @@ return new class extends Migration
                             B.tanggal_transaksi,
                             0 AS debet,
                             (IFNULL(SUM(A.kredit), 0)-IFNULL(SUM(A.debet), 0)) AS kredit
-                        FROM detail_jurnal_umum AS A
-                        INNER JOIN jurnal_umum AS B ON A.no_jurnal = B.no_jurnal
-                        INNER JOIN akun AS C ON A.kode_akun = C.kode_akun
+                        FROM jurnal_umum_detail AS A
+                        INNER JOIN jurnal_umum AS B ON A.id_jurnal_umum = B.id
+                        INNER JOIN akun AS C ON A.id_akun = C.id
                         WHERE C.tipe_akun = 'PENDAPATAN' AND B.deleted_at IS NULL
                         GROUP BY B.tanggal_transaksi, A.kode_akun, A.nama_akun
 
@@ -79,9 +79,9 @@ return new class extends Migration
                             B.tanggal_transaksi,
                             (IFNULL(SUM(A.debet), 0)-IFNULL(SUM(A.kredit), 0)) AS debet,
                             0 AS kredit
-                        FROM detail_jurnal_umum AS A
-                        INNER JOIN jurnal_umum AS B ON A.no_jurnal = B.no_jurnal
-                        INNER JOIN akun AS C ON A.kode_akun = C.kode_akun
+                        FROM jurnal_umum_detail AS A
+                        INNER JOIN jurnal_umum AS B ON A.id_jurnal_umum = B.id
+                        INNER JOIN akun AS C ON A.id_akun = C.id
                         WHERE C.tipe_akun = 'BEBAN' AND B.deleted_at IS NULL
                         GROUP BY B.tanggal_transaksi, A.kode_akun, A.nama_akun
                     ) AS TEMP

@@ -1,39 +1,39 @@
 <?php
-namespace App\Http\Services\Akun;
+namespace App\Http\Services\Supplier;
 
 use Exception;
-use App\Models\Akun;
+use App\Models\Supplier;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
-use App\Http\Resources\Akun\AkunResource;
+use App\Http\Resources\Supplier\SupplierResource;
 
-class AkunService extends BaseService
+class SupplierService extends BaseService
 {
     /* PRIVATE VARIABLE */
-    private $akunModel;
+    private $supplierModel;
 
     public function __construct()
     {
-        $this->akunModel = new Akun();
+        $this->supplierModel = new Supplier();
     }
 
-    /* FETCH ALL AKUN */
+    /* FETCH ALL SUPPLIER */
     public function fetchLimit($props){
         /* GET DATA FOR PAGINATION AS A MODEL */
-        $getAllData = $this->dataFilterPagination($this->akunModel, [], null);
+        $getAllData = $this->dataFilterPagination($this->supplierModel, [], null);
         $totalData = $getAllData->count();
 
         /* GET DATA WITH FILTER FOR PAGINATION AS A MODEL */
-        $getFilterData = $this->dataFilterPagination($this->akunModel, $props, null);
+        $getFilterData = $this->dataFilterPagination($this->supplierModel, $props, null);
         $totalFiltered = $getFilterData->count();
 
         /* GET DATA WITH FILTER AS A MODEL */
-        $datas = $this->dataFilter($this->akunModel, $props, null);
+        $datas = $this->dataFilter($this->supplierModel, $props, null);
 
         /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
         $datas = $datas->get();
-        $datas = AkunResource::collection($datas);
-        $akun = [
+        $datas = SupplierResource::collection($datas);
+        $supplier = [
             "total" => $totalData,
             "total_filter" => $totalFiltered,
             "per_page" => $props['take'],
@@ -47,16 +47,16 @@ class AkunService extends BaseService
             "data" => $datas
         ];
 
-        return $akun;
+        return $supplier;
     }
 
-    /* FETCH AKUN BY ID */
+    /* FETCH SUPPLIER BY ID */
     public function fetchById($id){
         try {
-            $akun = $this->akunModel::find($id);
-            if ($akun) {
-                $akun = AkunResource::make($akun);
-                return $akun;
+            $supplier = $this->supplierModel::find($id);
+            if ($supplier) {
+                $supplier = SupplierResource::make($supplier);
+                return $supplier;
             }
 
             throw new Exception('Catatan tidak ditemukan!');
@@ -65,28 +65,24 @@ class AkunService extends BaseService
         }
     }
 
-    /* CREATE NEW AKUN */
-    public function createAkun($props){
+    /* CREATE NEW SUPPLIER */
+    public function createSupplier($props){
         /* BEGIN DB TRANSACTION */
         DB::beginTransaction();
 
         try {
-            $akun = $this->akunModel;
-            $akun->kode_akun    = $props['kode_akun'];
-            $akun->nama_akun    = $props['nama_akun'];
-            $akun->akun_utama   = $props['akun_utama'];
-            $akun->tipe_akun    = $props['tipe_akun'];
-            $akun->arus_kas     = $props['setara_kas'];
-            $akun->arus_kas_tipe= $props['arus_kas_tipe'];
-            $akun->default      = $props['default'];
-            $akun->id_user      = $this->returnAuthUser()->id;
-            $akun->save();
+            $supplier = $this->supplierModel;
+            $supplier->nama_supplier    = $props['nama_supplier'];
+            $supplier->alamat           = $props['alamat'];
+            $supplier->no_telp          = $props['no_telp'];
+            $supplier->id_user          = $this->returnAuthUser()->id;
+            $supplier->save();
 
             /* COMMIT DB TRANSACTION */
             DB::commit();
 
-            $akun = AkunResource::make($akun);
-            return $akun;
+            $supplier = SupplierResource::make($supplier);
+            return $supplier;
         } catch (Exception $ex) {
             /* ROLLBACK DB TRANSACTION */
             DB::rollback();
@@ -95,30 +91,26 @@ class AkunService extends BaseService
         }
     }
 
-    /* UPDATE AKUN */
-    public function updateAkun($props, $id){
+    /* UPDATE SUPPLIER */
+    public function updateSupplier($props, $id){
         /* BEGIN DB TRANSACTION */
         DB::beginTransaction();
 
         try {
-            $akun = $this->akunModel::find($id);
-            if ($akun) {
-                /* UPDATE AKUN */
-                $akun->kode_akun    = $props['kode_akun'];
-                $akun->nama_akun    = $props['nama_akun'];
-                $akun->akun_utama   = $props['akun_utama'];
-                $akun->tipe_akun    = $props['tipe_akun'];
-                $akun->arus_kas     = $props['setara_kas'];
-                $akun->arus_kas_tipe= $props['arus_kas_tipe'];
-                $akun->default      = $props['default'];
-                $akun->id_user      = $this->returnAuthUser()->id;
-                $akun->update();
+            $supplier = $this->supplierModel::find($id);
+            if ($supplier) {
+                /* UPDATE SUPPLIER */
+                $supplier->nama_supplier    = $props['nama_supplier'];
+                $supplier->alamat           = $props['alamat'];
+                $supplier->no_telp          = $props['no_telp'];
+                $supplier->id_user          = $this->returnAuthUser()->id;
+                $supplier->update();
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();
 
-                $akun = AkunResource::make($akun);
-                return $akun;
+                $supplier = SupplierResource::make($supplier);
+                return $supplier;
             } else {
                 throw new Exception('Catatan tidak ditemukan!');
             }
@@ -130,12 +122,12 @@ class AkunService extends BaseService
         }
     }
 
-    /* DESTROY AKUN */
-    public function destroyAkun($id){
+    /* DESTROY SUPPLIER */
+    public function destroySupplier($id){
         try {
-            $akun = $this->akunModel::find($id);
-            if ($akun) {
-                $akun->delete();
+            $supplier = $this->supplierModel::find($id);
+            if ($supplier) {
+                $supplier->delete();
 
                 return null;
             }
@@ -146,13 +138,13 @@ class AkunService extends BaseService
         }
     }
 
-    /* DESTROY SELECTED / MULTIPLE AKUN */
-    public function destroyMultipleAkun($props){
+    /* DESTROY SELECTED / MULTIPLE SUPPLIER */
+    public function destroyMultipleSupplier($props){
         try {
-            $akun = $this->akunModel::whereIn('id', $props);
+            $supplier = $this->supplierModel::whereIn('id', $props);
 
-            if ($akun->count() > 0) {
-                $akun->delete();
+            if ($supplier->count() > 0) {
+                $supplier->delete();
 
                 return null;
             }
@@ -163,16 +155,16 @@ class AkunService extends BaseService
         }
     }
 
-    /* FETCH ALL AKUN FOR OPTIONS */
+    /* FETCH ALL SUPPLIER FOR OPTIONS */
     public function fetchDataOptions($props){
         try {
             /* GET DATA WITH FILTER AS A MODEL */
-            $datas = $this->dataFilterPagination($this->akunModel, $props, null);
+            $datas = $this->dataFilterPagination($this->supplierModel, $props, null);
 
             /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
-            $akun = $datas->select('id', 'kode_akun', 'nama_akun')->get();
+            $supplier = $datas->select('id', 'nama_supplier', 'alamat')->get();
 
-            return $akun;
+            return $supplier;
         } catch (Exception $ex) {
             throw $ex;
         }

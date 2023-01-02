@@ -1,13 +1,13 @@
 <?php
-namespace App\Http\Services\Jurnal;
+namespace App\Http\Services\Pembelian;
 
 use Exception;
-use App\Models\DetailJurnalUmum;
+use App\Models\PembelianDetail;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
-use App\Http\Resources\Jurnal\DetailJurnalResource;
+use App\Http\Resources\Pembelian\PembelianDetailResource;
 
-class DetailJurnalService extends BaseService
+class PembelianDetailService extends BaseService
 {
     /* PRIVATE VARIABLE */
     private $detailModel;
@@ -15,26 +15,42 @@ class DetailJurnalService extends BaseService
 
     public function __construct()
     {
-        $this->detailModel = new DetailJurnalUmum();
+        $this->detailModel = new PembelianDetail();
         $this->carbon = $this->returnCarbon();
     }
 
-    /* FETCH ALL DETAIL JURNAL */
+    /* FETCH ALL DETAIL PEMBELIAN */
+    public function fetchAll($props){
+        try {
+            /* GET DATA WITH FILTER AS A MODEL */
+            $datas = $this->dataFilterPagination($this->model, $props, null)->where('id_pembelian', '=', $props['id_pembelian']);
+
+            /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
+            $datas = $datas->get();
+            $detail = PembelianDetailResource::collection($datas);
+
+            return $detail;
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    /* FETCH LIMIT DETAIL PEMBELIAN */
     public function fetchLimit($props){
         /* GET DATA FOR PAGINATION AS A MODEL */
-        $getAllData = $this->dataFilterPagination($this->detailModel, [], null)->where('no_jurnal', '=', $props['no_jurnal']);
+        $getAllData = $this->dataFilterPagination($this->detailModel, [], null)->where('id_pembelian', '=', $props['id_pembelian']);
         $totalData = $getAllData->count();
 
         /* GET DATA WITH FILTER FOR PAGINATION AS A MODEL */
-        $getFilterData = $this->dataFilterPagination($this->detailModel, $props, null)->where('no_jurnal', '=', $props['no_jurnal']);
+        $getFilterData = $this->dataFilterPagination($this->detailModel, $props, null)->where('id_pembelian', '=', $props['id_pembelian']);
         $totalFiltered = $getFilterData->count();
 
         /* GET DATA WITH FILTER AS A MODEL */
-        $datas = $this->dataFilter($this->detailModel, $props, null)->where('no_jurnal', '=', $props['no_jurnal']);
+        $datas = $this->dataFilter($this->detailModel, $props, null)->where('id_pembelian', '=', $props['id_pembelian']);
 
         /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
         $datas = $datas->get();
-        $datas = DetailJurnalResource::collection($datas);
+        $datas = PembelianDetailResource::collection($datas);
         $detail = [
             "total" => $totalData,
             "total_filter" => $totalFiltered,
@@ -52,12 +68,12 @@ class DetailJurnalService extends BaseService
         return $detail;
     }
 
-    /* FETCH DETAIL JURNAL BY ID */
+    /* FETCH DETAIL PEMBELIAN BY ID */
     public function fetchById($id){
         try {
             $detail = $this->detailModel::find($id);
             if ($detail) {
-                $detail = DetailJurnalResource::make($detail);
+                $detail = PembelianDetailResource::make($detail);
                 return $detail;
             }
 
@@ -67,24 +83,24 @@ class DetailJurnalService extends BaseService
         }
     }
 
-    /* CREATE NEW DETAIL JURNAL */
+    /* CREATE NEW DETAIL PEMBELIAN */
     public function createDetail($props){
         /* BEGIN DB TRANSACTION */
         DB::beginTransaction();
 
         try {
             $detail = $this->detailModel;
-            $detail->no_jurnal  = $props['no_jurnal'];
-            $detail->kode_akun  = $props['kode_akun'];
-            $detail->nama_akun  = $props['nama_akun'];
-            $detail->debet      = $props['debet'];
-            $detail->kredit     = $props['kredit'];
+            $detail->id_pembelian   = $props['id_pembelian'];
+            $detail->id_barang      = $props['id_barang'];
+            $detail->harga          = $props['harga'];
+            $detail->qty            = $props['qty'];
+            $detail->total          = $props['total'];
             $detail->save();
 
             /* COMMIT DB TRANSACTION */
             DB::commit();
 
-            $detail = DetailJurnalResource::make($detail);
+            $detail = PembelianDetailResource::make($detail);
             return $detail;
         } catch (Exception $ex) {
             /* ROLLBACK DB TRANSACTION */
@@ -94,7 +110,7 @@ class DetailJurnalService extends BaseService
         }
     }
 
-    /* UPDATE DETAIL JURNAL */
+    /* UPDATE DETAIL PEMBELIAN */
     public function updateDetail($props, $id){
         /* BEGIN DB TRANSACTION */
         DB::beginTransaction();
@@ -102,18 +118,18 @@ class DetailJurnalService extends BaseService
         try {
             $detail = $this->detailModel::find($id);
             if ($detail) {
-                /* UPDATE DETAIL JURNAL */
-                $detail->no_jurnal  = $props['no_jurnal'];
-                $detail->kode_akun  = $props['kode_akun'];
-                $detail->nama_akun  = $props['nama_akun'];
-                $detail->debet      = $props['debet'];
-                $detail->kredit     = $props['kredit'];
+                /* UPDATE DETAIL PEMBELIAN */
+                $detail->id_pembelian   = $props['id_pembelian'];
+                $detail->id_barang      = $props['id_barang'];
+                $detail->harga          = $props['harga'];
+                $detail->qty            = $props['qty'];
+                $detail->total          = $props['total'];
                 $detail->update();
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();
 
-                $detail = DetailJurnalResource::make($detail);
+                $detail = PembelianDetailResource::make($detail);
                 return $detail;
             } else {
                 throw new Exception('Catatan tidak ditemukan!');
@@ -126,7 +142,7 @@ class DetailJurnalService extends BaseService
         }
     }
 
-    /* DESTROY DETAIL JURNAL */
+    /* DESTROY DETAIL PEMBELIAN */
     public function destroyDetail($id){
         try {
             $detail = $this->detailModel::find($id);
@@ -142,7 +158,7 @@ class DetailJurnalService extends BaseService
         }
     }
 
-    /* DESTROY SELECTED / MULTIPLE DETAIL JURNAL */
+    /* DESTROY SELECTED / MULTIPLE DETAIL PEMBELIAN */
     public function destroyMultipleDetail($props){
         try {
             $detail = $this->detailModel::whereIn('id', $props);

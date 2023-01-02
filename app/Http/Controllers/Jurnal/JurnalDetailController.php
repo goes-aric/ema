@@ -3,18 +3,18 @@ namespace App\Http\Controllers\Jurnal;
 
 use Exception;
 use Illuminate\Http\Request;
-use App\Http\Services\Jurnal\DetailJurnalService;
+use App\Http\Services\Jurnal\JurnalDetailService;
 use App\Http\Controllers\BaseController;
 
-class DetailJurnalController extends BaseController
+class JurnalDetailController extends BaseController
 {
     private $detailServices;
     private $moduleName;
 
-    public function __construct(DetailJurnalService $detailServices)
+    public function __construct(JurnalDetailService $detailServices)
     {
         $this->detailServices = $detailServices;
-        $this->moduleName = 'Detail jurnal Umum';
+        $this->moduleName = 'Jurnal Umum Detail';
     }
 
     public function index(Request $request)
@@ -22,7 +22,7 @@ class DetailJurnalController extends BaseController
         try {
             $props = $this->getBaseQueryParams($request, []);
             $props += [
-                'no_jurnal'  => $request['no_jurnal'] ?? null
+                'id_jurnal_umum'  => $request['id_jurnal_umum'] ?? null
             ];
             $detail = $this->detailServices->fetchLimit($props);
 
@@ -36,11 +36,11 @@ class DetailJurnalController extends BaseController
     {
         try {
             $rules = [
-                'no_jurnal' => 'required',
-                'kode_akun' => 'required',
-                'nama_akun' => 'required',
-                'debet'     => 'required|numeric',
-                'kredit'    => 'required|numeric',
+                'id_jurnal_umum'    => 'required',
+                'kode_akun'         => 'required',
+                'nama_akun'         => 'required',
+                'debet'             => 'required|numeric',
+                'kredit'            => 'required|numeric',
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {
@@ -68,11 +68,11 @@ class DetailJurnalController extends BaseController
     {
         try {
             $rules = [
-                'no_jurnal' => 'required',
-                'kode_akun' => 'required',
-                'nama_akun' => 'required',
-                'debet'     => 'required|numeric',
-                'kredit'    => 'required|numeric',
+                'id_jurnal_umum'    => 'required',
+                'kode_akun'         => 'required',
+                'nama_akun'         => 'required',
+                'debet'             => 'required|numeric',
+                'kredit'            => 'required|numeric',
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {

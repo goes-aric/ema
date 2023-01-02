@@ -15,7 +15,7 @@ class JurnalResource extends JsonResource
             'sumber'            => $this->sumber,
             'gambar'            => $this->gambar ? asset('/storage/images') . '/' . $this->gambar : null,
             'details'           => $this->details,
-            'kode_user'         => $this->createdUser->kode_user,
+            'id_user'           => $this->createdUser->id,
             'nama_user'         => $this->createdUser->nama ?? null
         ];
     }

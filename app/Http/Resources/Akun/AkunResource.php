@@ -17,9 +17,11 @@ class AkunResource extends JsonResource
             'tipe_akun'             => $this->tipe_akun,
             'arus_kas'              => $this->arus_kas,
             'arus_kas_tipe'         => $this->arus_kas_tipe ?? null,
-            'arus_kas_tipe_text'    => $this->arusKasTipeArray($this->arus_kas_tipe),            
+            'arus_kas_tipe_text'    => $this->arusKasTipeArray($this->arus_kas_tipe),
+            'default'               => $this->default,
+            'default_text'          => $this->defaultArray($this->default),
             'transaksi'             => $this->transaksi,
-            'kode_user'             => $this->createdUser->kode_user,
+            'id_user'               => $this->createdUser->id,
             'nama_user'             => $this->createdUser->nama ?? null
         ];
     }
@@ -70,5 +72,49 @@ class AkunResource extends JsonResource
 
         $key = array_search($id, array_column($akun, 'id'));
         return $akun[$key]['name'];
-    }    
+    }
+
+    public function defaultArray($id){
+        $akun = [
+            [
+                'id'    => 'hpp',
+                'name'  => 'HPP'
+            ],
+            [
+                'id'    => 'persediaan',
+                'name'  => 'Persediaan'
+            ],
+            [
+                'id'    => 'tunai',
+                'name'  => 'Transaksi Tunai'
+            ],
+            [
+                'id'    => 'pembelian',
+                'name'  => 'Pembelian'
+            ],
+            [
+                'id'    => 'penjualan',
+                'name'  => 'Penjualan'
+            ],
+            [
+                'id'    => 'pembelian kredit',
+                'name'  => 'Pembelian Kredit'
+            ],
+            [
+                'id'    => 'penjualan kredit',
+                'name'  => 'Penjualan Kredit'
+            ],
+            [
+                'id'    => 'diskon pembelian',
+                'name'  => 'Diskon Pembelian'
+            ],
+            [
+                'id'    => 'diskon penjualan',
+                'name'  => 'Diskon Penjualan'
+            ],
+        ];
+
+        $key = array_search($id, array_column($akun, 'id'));
+        return $akun[$key]['name'];
+    }
 }

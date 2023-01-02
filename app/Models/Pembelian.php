@@ -13,33 +13,38 @@ class Pembelian extends BaseModel
 
     protected $searchable = [
         'columns' => [
-            'kode_beli' => 10,
-            'tanggal' => 10,
-            'nominal' => 5,
-            'metode_bayar' => 5,
-            'uraian' => 5,
-            'kode_akun_persediaan' => 5,
-            'kode_akun_pembayaran' => 5,
-            'gambar' => 5,
-            'kode_user' => 5,
-        ]
+            'pembelian.no_transaksi' => 10,
+            'pembelian.tanggal' => 10,
+            'pembelian.metode_bayar' => 5,
+            'pembelian.id_supplier' => 5,
+            'pembelian.total' => 5,
+            'pembelian.diskon' => 5,
+            'pembelian.grand_total' => 5,
+            'pembelian.catatan' => 5,
+            'pembelian.gambar' => 5,
+            'pembelian.id_user' => 5,
+            'supplier.nama_supplier' => 5,
+        ],
+        'joins' => [
+            'supplier' => ['pembelian.id_supplier','supplier.id'],
+        ],
     ];
 
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-    	'kode_beli', 'tanggal', 'nominal', 'metode_bayar', 'uraian', 'kode_akun_persediaan', 'kode_akun_pembayaran', 'gambar', 'kode_user',
+    	'no_transaksi', 'tanggal', 'metode_bayar', 'id_supplier', 'total', 'diskon', 'grand_total', 'catatan', 'gambar', 'id_user',
     ];
 
     protected $table = 'pembelian';
 
-    public function akunPersediaan()
+    public function supplier()
     {
-        return $this->belongsTo('App\Models\Akun', 'kode_akun_persediaan', 'kode_akun');
+        return $this->belongsTo('App\Models\Supplier', 'id_supplier');
     }
 
-    public function akunPembayaran()
+    public function details()
     {
-        return $this->belongsTo('App\Models\Akun', 'kode_akun_pembayaran', 'kode_akun');
+        return $this->hasMany('App\Models\PembelianDetail', 'id_pembelian');
     }
 }

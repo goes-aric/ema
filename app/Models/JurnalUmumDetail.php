@@ -5,13 +5,13 @@ namespace App\Models;
 use App\Models\BaseModel;
 use Illuminate\Notifications\Notifiable;
 
-class DetailJurnalUmum extends BaseModel
+class JurnalUmumDetail extends BaseModel
 {
     use Notifiable;
 
     protected $searchable = [
         'columns' => [
-            'no_jurnal' => 10,
+            'id_jurnal_umum' => 10,
             'kode_akun' => 10,
             'nama_akun' => 5,
             'debet' => 5,
@@ -22,13 +22,13 @@ class DetailJurnalUmum extends BaseModel
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-    	'no_jurnal', 'kode_akun', 'nama_akun', 'debet', 'kredit',
+    	'id_jurnal_umum', 'kode_akun', 'nama_akun', 'debet', 'kredit',
     ];
 
-    protected $table = 'detail_jurnal_umum';
+    protected $table = 'jurnal_umum_detail';
 
     public function jurnal()
     {
-        return $this->belongsTo('App\Models\JurnalUmum', 'no_jurnal', 'no_jurnal');
+        return $this->belongsTo('App\Models\JurnalUmum', 'id_jurnal_umum');
     }
 }

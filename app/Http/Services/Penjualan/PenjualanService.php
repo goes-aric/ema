@@ -5,28 +5,34 @@ use Exception;
 use App\Models\Akun;
 use App\Models\Penjualan;
 use App\Models\JurnalUmum;
-use App\Models\DetailJurnalUmum;
+use App\Models\JurnalUmumDetail;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Services\Jurnal\JurnalService;
 use App\Http\Resources\Penjualan\PenjualanResource;
+use App\Models\Barang;
+use App\Models\PenjualanDetail;
 
 class PenjualanService extends BaseService
 {
     /* PRIVATE VARIABLE */
     private $penjualanModel;
+    private $penjualanDetailModel;
     private $jurnalModel;
     private $detailModel;
     private $akunModel;
+    private $barangModel;
     private $jurnalService;
     private $carbon;
 
     public function __construct()
     {
         $this->penjualanModel = new Penjualan();
+        $this->penjualanDetailModel = new PenjualanDetail();
         $this->jurnalModel = new JurnalUmum();
-        $this->detailModel = new DetailJurnalUmum();
+        $this->detailModel = new JurnalUmumDetail();
         $this->akunModel = new Akun();
+        $this->barangModel = new Barang();
         $this->jurnalService = new JurnalService;
         $this->carbon = $this->returnCarbon();
     }
@@ -98,7 +104,7 @@ class PenjualanService extends BaseService
 
         try {
             /* GENERATE NEW ID */
-            $newID = $this->createNoTransaksi();
+            $newID = $this->checkNumberExists($props['no_transaksi']) ? $this->createNoTransaksi() : $props['no_transaksi'];
 
             /* IMAGE VARIABLE */
             $imageName = null;
@@ -107,23 +113,58 @@ class PenjualanService extends BaseService
 
             /* TRY TO UPLOAD IMAGE FIRST */
             /* DECLARE NEW IMAGE VARIABLE */
-            $image = $props->file('gambar');
-            $newName = 'penjualan-'.$newID.'.'. $image->getClientOriginalExtension();
-            $uploadImage = $this->returnUploadFile($imagePath, $newName, $imageBinary);
-            if ($uploadImage['status'] == 'success') {
-                $imageName = $uploadImage['filename'];
+            if (!empty($props->file('gambar'))) {
+                $image = $props->file('gambar');
+                $newName = 'penjualan-'.$newID.'.'. $image->getClientOriginalExtension();
+                $uploadImage = $this->returnUploadFile($imagePath, $newName, $imageBinary);
+                if ($uploadImage['status'] == 'success') {
+                    $imageName = $uploadImage['filename'];
+                }
             }
 
             $penjualan = $this->penjualanModel;
-            $penjualan->kode_jual               = $newID;
-            $penjualan->tanggal                 = $props['tanggal'];
-            $penjualan->nominal                 = $props['nominal'];
-            $penjualan->uraian                  = $props['uraian'];
-            $penjualan->kode_akun_persediaan    = $props['kode_akun_persediaan'];
-            $penjualan->kode_akun_penerimaan    = $props['kode_akun_penerimaan'];
-            $penjualan->gambar                  = $imageName;
-            $penjualan->kode_user               = $this->returnAuthUser()->kode_user;
+            $penjualan->no_transaksi    = $newID;
+            $penjualan->tanggal         = $props['tanggal'];
+            $penjualan->total           = $props['total'];
+            $penjualan->diskon          = $props['diskon'];
+            $penjualan->grand_total     = $props['grand_total'];
+            $penjualan->gambar          = $imageName;
+            $penjualan->catatan         = $props['catatan'];
+            $penjualan->id_user         = $this->returnAuthUser()->id;
             $penjualan->save();
+
+            /* REMOVE PREV DETAILS */
+            $this->penjualanDetailModel::where('id_penjualan', '=', $penjualan['id'])->delete();
+
+            /* DETAILS */
+            $hargaPokokPenjualan = 0;
+            foreach (json_decode($props['details']) as $item) {
+                $barang = $this->barangModel->find($item->id_barang);
+                $hargaPokokPenjualan += floatval($barang->harga_beli);
+
+                $detail = new $this->penjualanDetailModel;
+                $detail->id_penjualan   = $penjualan['id'];
+                $detail->id_barang      = $item->id_barang;
+                $detail->harga          = $item->harga;
+                $detail->qty            = $item->qty;
+                $detail->total          = $item->total;
+                $detail->save();
+            }
+
+            /*--------------------------------------------------------------*/
+            /* JURNAL PENJUALAN BARANG / PERSEDIAAN
+            /*--------------------------------------------------------------*/
+            /* PERKIRAAN                  DEBET             KREDIT
+            /*--------------------------------------------------------------*/
+            /* KAS                        XXX
+            /* DISKON                     XXX
+            /*      PENJUALAN                               XXX
+            /* HPP                        XXX
+            /*      PERSEDIAAN                              XXX
+            /*--------------------------------------------------------------*/
+
+            /* REMOVE PREV JURNAL */
+            $this->jurnalModel::where('sumber', '=', $penjualan->no_transaksi)->delete();
 
             /* GET NO JURNAL */
             $noJurnal = $this->jurnalService->createNoJurnal();
@@ -133,32 +174,70 @@ class PenjualanService extends BaseService
             $jurnal->no_jurnal          = $noJurnal;
             $jurnal->tanggal_transaksi  = $props['tanggal'];
             $jurnal->deskripsi          = $props['uraian'];
-            $jurnal->sumber             = $newID;
+            $jurnal->sumber             = $penjualan['no_transaksi'];
             $jurnal->gambar             = $imageName;
-            $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
+            $jurnal->id_user            = $this->returnAuthUser()->id;
             $jurnal->save();
 
-            /* PERSEDIAAN */
-            $akunPersediaan = $this->akunModel::where('kode_akun', '=', $props['kode_akun_persediaan'])->first();
-
-            $persediaan = new $this->detailModel;
-            $persediaan->no_jurnal  = $jurnal['no_jurnal'];
-            $persediaan->kode_akun  = $akunPersediaan->kode_akun;
-            $persediaan->nama_akun  = $akunPersediaan->nama_akun;
-            $persediaan->debet      = 0;
-            $persediaan->kredit     = $props->nominal;
-            $persediaan->save();
-
-            /* PENERIMAAN */
-            $akunPenerimaan = $this->akunModel::where('kode_akun', '=', $props['kode_akun_penerimaan'])->first();
+            /* PENERIMAAN KAS / PIUTANG */
+            $akunPenerimaan = $this->akunModel::where('default', '=', 'tunai')->first();
 
             $penerimaan = new $this->detailModel;
-            $penerimaan->no_jurnal  = $jurnal['no_jurnal'];
-            $penerimaan->kode_akun  = $akunPenerimaan->kode_akun;
-            $penerimaan->nama_akun  = $akunPenerimaan->nama_akun;
-            $penerimaan->debet      = $props->nominal;
-            $penerimaan->kredit     = 0;
+            $penerimaan->id_jurnal_umum = $jurnal['id'];
+            $penerimaan->id_akun        = $akunPenerimaan->id;
+            $penerimaan->kode_akun      = $akunPenerimaan->kode_akun;
+            $penerimaan->nama_akun      = $akunPenerimaan->nama_akun;
+            $penerimaan->debet          = floatval($props->grand_total);
+            $penerimaan->kredit         = 0;
             $penerimaan->save();
+
+            /* DISKON PENJUALAN */
+            $akunDiskon = $this->akunModel::where('default', '=', 'diskon penjualan')->first();
+
+            $diskon = new $this->detailModel;
+            $diskon->id_jurnal_umum = $jurnal['id'];
+            $diskon->id_akun        = $akunDiskon->id;
+            $diskon->kode_akun      = $akunDiskon->kode_akun;
+            $diskon->nama_akun      = $akunDiskon->nama_akun;
+            $diskon->debet          = floatval($props->diskon);
+            $diskon->kredit         = 0;
+            $diskon->save();
+
+            /* PENJUALAN */
+            $akunPenjualan = $this->akunModel::where('default', '=', 'penjualan')->first();
+
+            $penjualanx = new $this->detailModel;
+            $penjualanx->id_jurnal_umum = $jurnal['id'];
+            $penjualanx->id_akun        = $akunPenjualan->id;
+            $penjualanx->kode_akun      = $akunPenjualan->kode_akun;
+            $penjualanx->nama_akun      = $akunPenjualan->nama_akun;
+            $penjualanx->debet          = 0;
+            $penjualanx->kredit         = floatval($props->total);
+            $penjualanx->save();
+
+            /* HPP */
+            $akunHPP = $this->akunModel::where('default', '=', 'hpp')->first();
+
+            $hpp = new $this->detailModel;
+            $hpp->id_jurnal_umum = $jurnal['id'];
+            $hpp->id_akun        = $akunHPP->id;
+            $hpp->kode_akun      = $akunHPP->kode_akun;
+            $hpp->nama_akun      = $akunHPP->nama_akun;
+            $hpp->debet          = floatval($hargaPokokPenjualan);
+            $hpp->kredit         = 0;
+            $hpp->save();
+
+            /* PERSEDIAAN */
+            $akunPersediaan = $this->akunModel::where('default', '=', 'persediaan')->first();
+
+            $persediaan = new $this->detailModel;
+            $persediaan->id_jurnal_umum = $jurnal['id'];
+            $persediaan->id_akun        = $akunPersediaan->id;
+            $persediaan->kode_akun      = $akunPersediaan->kode_akun;
+            $persediaan->nama_akun      = $akunPersediaan->nama_akun;
+            $persediaan->debet          = 0;
+            $persediaan->kredit         = floatval($hargaPokokPenjualan);
+            $persediaan->save();
 
             /* COMMIT DB TRANSACTION */
             DB::commit();
@@ -195,7 +274,7 @@ class PenjualanService extends BaseService
 
                     /* DECLARE NEW IMAGE VARIABLE */
                     $image = $props->file('gambar');
-                    $newName = 'penjualan-'.$penjualan->kode_jual.'.'. $image->getClientOriginalExtension();
+                    $newName = 'penjualan-'.$penjualan->no_transaksi.'.'. $image->getClientOriginalExtension();
                     $uploadImage = $this->returnUploadFile($imagePath, $newName, $imageBinary);
                     if ($uploadImage['status'] == 'success') {
                         $imageName = $uploadImage['filename'];
@@ -203,17 +282,47 @@ class PenjualanService extends BaseService
                 }
 
                 /* UPDATE PENJUALAN */
-                $penjualan->tanggal                 = $props['tanggal'];
-                $penjualan->nominal                 = $props['nominal'];
-                $penjualan->uraian                  = $props['uraian'];
-                $penjualan->kode_akun_persediaan    = $props['kode_akun_persediaan'];
-                $penjualan->kode_akun_penerimaan    = $props['kode_akun_penerimaan'];
-                $penjualan->gambar                  = $imageName;
-                $penjualan->kode_user               = $this->returnAuthUser()->kode_user;
+                $penjualan->tanggal     = $props['tanggal'];
+                $penjualan->total       = $props['total'];
+                $penjualan->diskon      = $props['diskon'];
+                $penjualan->grand_total = $props['grand_total'];
+                $penjualan->catatan     = $props['catatan'];
+                $penjualan->gambar      = $imageName;
+                $penjualan->id_user     = $this->returnAuthUser()->id;
                 $penjualan->update();
 
+                /* REMOVE PREV DETAILS */
+                $this->penjualanDetailModel::where('id_penjualan', '=', $penjualan['id'])->delete();
+
+                /* DETAILS */
+                $hargaPokokPenjualan = 0;
+                foreach (json_decode($props['details']) as $item) {
+                    $barang = $this->barangModel->find($item->id_barang);
+                    $hargaPokokPenjualan += floatval($barang->harga_beli);
+
+                    $detail = new $this->penjualanDetailModel;
+                    $detail->id_penjualan   = $penjualan['id'];
+                    $detail->id_barang      = $item->id_barang;
+                    $detail->harga          = $item->harga;
+                    $detail->qty            = $item->qty;
+                    $detail->total          = $item->total;
+                    $detail->save();
+                }
+
+                /*--------------------------------------------------------------*/
+                /* JURNAL PENJUALAN BARANG / PERSEDIAAN
+                /*--------------------------------------------------------------*/
+                /* PERKIRAAN                  DEBET             KREDIT
+                /*--------------------------------------------------------------*/
+                /* KAS                        XXX
+                /* DISKON                     XXX
+                /*      PENJUALAN                               XXX
+                /* HPP                        XXX
+                /*      PERSEDIAAN                              XXX
+                /*--------------------------------------------------------------*/
+
                 /* REMOVE PREV JURNAL */
-                $this->jurnalModel::where('sumber', '=', $penjualan->kode_jual)->delete();
+                $this->jurnalModel::where('sumber', '=', $penjualan->no_transaksi)->delete();
 
                 /* GET NO JURNAL */
                 $noJurnal = $this->jurnalService->createNoJurnal();
@@ -223,32 +332,70 @@ class PenjualanService extends BaseService
                 $jurnal->no_jurnal          = $noJurnal;
                 $jurnal->tanggal_transaksi  = $props['tanggal'];
                 $jurnal->deskripsi          = $props['uraian'];
-                $jurnal->sumber             = $penjualan['kode_jual'];
+                $jurnal->sumber             = $penjualan['no_transaksi'];
                 $jurnal->gambar             = $imageName;
-                $jurnal->kode_user          = $this->returnAuthUser()->kode_user;
+                $jurnal->id_user            = $this->returnAuthUser()->id;
                 $jurnal->save();
 
-                /* PERSEDIAAN */
-                $akunPersediaan = $this->akunModel::where('kode_akun', '=', $props['kode_akun_persediaan'])->first();
-
-                $persediaan = new $this->detailModel;
-                $persediaan->no_jurnal  = $jurnal['no_jurnal'];
-                $persediaan->kode_akun  = $akunPersediaan->kode_akun;
-                $persediaan->nama_akun  = $akunPersediaan->nama_akun;
-                $persediaan->debet      = 0;
-                $persediaan->kredit     = $props->nominal;
-                $persediaan->save();
-
-                /* PENERIMAAN */
-                $akunPenerimaan = $this->akunModel::where('kode_akun', '=', $props['kode_akun_penerimaan'])->first();
+                /* PENERIMAAN KAS / PIUTANG */
+                $akunPenerimaan = $this->akunModel::where('default', '=', 'tunai')->first();
 
                 $penerimaan = new $this->detailModel;
-                $penerimaan->no_jurnal  = $jurnal['no_jurnal'];
-                $penerimaan->kode_akun  = $akunPenerimaan->kode_akun;
-                $penerimaan->nama_akun  = $akunPenerimaan->nama_akun;
-                $penerimaan->debet      = $props->nominal;
-                $penerimaan->kredit     = 0;
+                $penerimaan->id_jurnal_umum = $jurnal['id'];
+                $penerimaan->id_akun        = $akunPenerimaan->id;
+                $penerimaan->kode_akun      = $akunPenerimaan->kode_akun;
+                $penerimaan->nama_akun      = $akunPenerimaan->nama_akun;
+                $penerimaan->debet          = floatval($props->grand_total);
+                $penerimaan->kredit         = 0;
                 $penerimaan->save();
+
+                /* DISKON PENJUALAN */
+                $akunDiskon = $this->akunModel::where('default', '=', 'diskon penjualan')->first();
+
+                $diskon = new $this->detailModel;
+                $diskon->id_jurnal_umum = $jurnal['id'];
+                $diskon->id_akun        = $akunDiskon->id;
+                $diskon->kode_akun      = $akunDiskon->kode_akun;
+                $diskon->nama_akun      = $akunDiskon->nama_akun;
+                $diskon->debet          = floatval($props->diskon);
+                $diskon->kredit         = 0;
+                $diskon->save();
+
+                /* PENJUALAN */
+                $akunPenjualan = $this->akunModel::where('default', '=', 'penjualan')->first();
+
+                $penjualanx = new $this->detailModel;
+                $penjualanx->id_jurnal_umum = $jurnal['id'];
+                $penjualanx->id_akun        = $akunPenjualan->id;
+                $penjualanx->kode_akun      = $akunPenjualan->kode_akun;
+                $penjualanx->nama_akun      = $akunPenjualan->nama_akun;
+                $penjualanx->debet          = 0;
+                $penjualanx->kredit         = floatval($props->total);
+                $penjualanx->save();
+
+                /* HPP */
+                $akunHPP = $this->akunModel::where('default', '=', 'hpp')->first();
+
+                $hpp = new $this->detailModel;
+                $hpp->id_jurnal_umum = $jurnal['id'];
+                $hpp->id_akun        = $akunHPP->id;
+                $hpp->kode_akun      = $akunHPP->kode_akun;
+                $hpp->nama_akun      = $akunHPP->nama_akun;
+                $hpp->debet          = floatval($hargaPokokPenjualan);
+                $hpp->kredit         = 0;
+                $hpp->save();
+
+                /* PERSEDIAAN */
+                $akunPersediaan = $this->akunModel::where('default', '=', 'persediaan')->first();
+
+                $persediaan = new $this->detailModel;
+                $persediaan->id_jurnal_umum = $jurnal['id'];
+                $persediaan->id_akun        = $akunPersediaan->id;
+                $persediaan->kode_akun      = $akunPersediaan->kode_akun;
+                $persediaan->nama_akun      = $akunPersediaan->nama_akun;
+                $persediaan->debet          = 0;
+                $persediaan->kredit         = floatval($hargaPokokPenjualan);
+                $persediaan->save();
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();
@@ -272,10 +419,10 @@ class PenjualanService extends BaseService
             $penjualan = $this->penjualanModel::find($id);
             if ($penjualan) {
                 /* DELETE JURNAL UMUM */
-                $jurnal = $this->jurnalModel::where('sumber', '=', $penjualan->kode_jual)->first();
+                $jurnal = $this->jurnalModel::where('sumber', '=', $penjualan->no_transaksi)->first();
 
                 /* DELETE DETAIL JURNAL */
-                $this->detailModel::where('no_jurnal', '=', $jurnal['no_jurnal'])->delete();
+                $this->detailModel::where('id_jurnal_umum', '=', $jurnal['id'])->delete();
 
                 $jurnal->delete();
                 $penjualan->delete();
@@ -311,11 +458,18 @@ class PenjualanService extends BaseService
         $year   = $this->carbon::now()->format('Y');
 
         $newID  = "";
-        $maxID  = DB::select('SELECT IFNULL(RIGHT(MAX(kode_jual), 5), 0) AS maxID FROM penjualan WHERE deleted_at IS NULL AND RIGHT(LEFT(kode_jual, 7), 4) = :id', ['id' => $year]);
+        $maxID  = DB::select('SELECT IFNULL(RIGHT(MAX(no_transaksi), 5), 0) AS maxID FROM penjualan WHERE deleted_at IS NULL AND RIGHT(LEFT(no_transaksi, 7), 4) = :id', ['id' => $year]);
         $newID  = (int)$maxID[0]->maxID + 1;
         $newID  = 'PJ-'.$year.''.substr("0000000$newID", -5);
 
         return $newID;
+    }
+
+    /* CHECK INV NUMBER EXISTS */
+    public function checkNumberExists($number){
+        $exists = $this->penjualanModel::where('no_transaksi', '=', $number)->exists();
+
+        return $exists;
     }
 
     /* CHARTS PENJUALAN */
@@ -325,7 +479,7 @@ class PenjualanService extends BaseService
             $year = $this->carbon::now()->format('Y');
             $data = [];
             for ($x=1; $x <= 12; $x++) {
-                $data[] = $this->penjualanModel::selectRaw("$x AS month, IFNULL(SUM(nominal), 0) AS amount, 'Rupiah' AS unit")
+                $data[] = $this->penjualanModel::selectRaw("$x AS month, IFNULL(SUM(grand_total), 0) AS amount, 'Rupiah' AS unit")
                             ->whereYear('tanggal', '=', $year)
                             ->whereMonth('tanggal', '=', $x)
                             ->first();

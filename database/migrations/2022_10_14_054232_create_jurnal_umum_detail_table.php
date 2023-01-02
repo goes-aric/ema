@@ -13,13 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('detail_jurnal_umum', function (Blueprint $table) {
+        Schema::create('jurnal_umum_detail', function (Blueprint $table) {
             $table->id();
-            $table->string('no_jurnal', 150);
+            $table->bigInteger('id_jurnal_umum')->unsigned();
+            $table->foreign('id_jurnal_umum')->references('id')->on('jurnal_umum')->onDelete('cascade');
+            $table->bigInteger('id_akun')->unsigned();
+            $table->foreign('id_akun')->references('id')->on('akun')->onDelete('cascade');
             $table->string('kode_akun', 150);
             $table->string('nama_akun', 255);
-            $table->decimal('debet', 12,2)->default(0);
-            $table->decimal('kredit', 12,2)->default(0);
+            $table->decimal('debet', 20,2)->default(0);
+            $table->decimal('kredit', 20,2)->default(0);
             $table->timestamps();
         });
     }
@@ -31,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('detail_jurnal_umum');
+        Schema::dropIfExists('jurnal_umum_detail');
     }
 };

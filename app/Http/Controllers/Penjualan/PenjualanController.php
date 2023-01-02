@@ -45,12 +45,13 @@ class PenjualanController extends BaseController
     {
         try {
             $rules = [
-                'tanggal'		        => 'required|date',
-                'nominal'               => 'required|numeric',
-                'uraian'                => 'nullable',
-                'kode_akun_persediaan'  => 'required',
-                'kode_akun_penerimaan'  => 'required',
-                'gambar'                => 'nullable',
+                'no_transaksi'  => 'required',
+                'tanggal'       => 'required|date',
+                'total'         => 'required|numeric',
+                'diskon'        => 'required|numeric',
+                'grand_total'   => 'required|numeric',
+                'gambar'        => 'nullable',
+                'catatan'       => 'nullable',
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {
@@ -78,12 +79,12 @@ class PenjualanController extends BaseController
     {
         try {
             $rules = [
-                'tanggal'		        => 'required|date',
-                'nominal'               => 'required|numeric',
-                'uraian'                => 'nullable',
-                'kode_akun_persediaan'  => 'required',
-                'kode_akun_penerimaan'  => 'required',
-                'gambar'                => 'nullable',
+                'tanggal'       => 'required|date',
+                'total'         => 'required|numeric',
+                'diskon'        => 'required|numeric',
+                'grand_total'   => 'required|numeric',
+                'gambar'        => 'nullable',
+                'catatan'       => 'nullable',
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {
@@ -114,6 +115,16 @@ class PenjualanController extends BaseController
             $penjualan = $this->penjualanServices->destroyMultiplePenjualan($props);
 
             return $this->returnResponse('success', self::HTTP_OK, 'Penjualan berhasil dihapus!', $penjualan);
+        } catch (Exception $ex) {
+            return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
+        }
+    }
+
+    public function getInvoiceNumber()
+    {
+        try {
+            $penjualan = $this->penjualanServices->createNoTransaksi();
+            return $this->returnResponse('success', self::HTTP_OK, 'No Invoice', $penjualan);
         } catch (Exception $ex) {
             return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
         }

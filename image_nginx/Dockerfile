@@ -4,9 +4,11 @@ FROM nginx:stable
 # GET LATEST COMPONENT LIST BASED ON CONFIGURED COMPONENTS
 RUN apt-get update
 RUN apt-get install -y curl
+RUN apt-get update
 RUN apt-get install -y build-essential libssl-dev zlib1g-dev libpng-dev libjpeg-dev libfreetype6-dev
 
 # INSTALL NANO EDITOR
+RUN apt-get update
 RUN apt-get install -y nano
 
 # INSTALL IPUTILS-PING

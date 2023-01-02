@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('pembelian', function (Blueprint $table) {
-            $table->string('gambar', 255)->nullable()->after('kode_akun_pembayaran');
+        Schema::table('akun', function (Blueprint $table) {
+            $table->string('default')->nullable()->after('arus_kas_tipe');
         });
     }
 
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('pembelian', function (Blueprint $table) {
-            $table->dropColumn('gambar');
+        Schema::table('akun', function (Blueprint $table) {
+            $table->dropColumn('default');
         });
     }
 };

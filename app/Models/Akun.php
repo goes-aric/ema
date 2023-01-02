@@ -22,7 +22,7 @@ class Akun extends BaseModel
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-    	'kode_akun', 'nama_akun', 'akun_utama', 'tipe_akun', 'kode_user',
+    	'kode_akun', 'nama_akun', 'akun_utama', 'tipe_akun', 'default', 'id_user',
     ];
 
     protected $table = 'akun';
@@ -34,6 +34,6 @@ class Akun extends BaseModel
 
     public function transaksi()
     {
-        return $this->hasMany('App\Models\DetailJurnalUmum', 'kode_akun', 'kode_akun');
+        return $this->hasMany('App\Models\JurnalUmumDetail', 'id_akun');
     }
 }

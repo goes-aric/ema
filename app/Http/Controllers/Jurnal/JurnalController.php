@@ -114,4 +114,14 @@ class JurnalController extends BaseController
             return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
         }
     }
+
+    public function getJournalNumber()
+    {
+        try {
+            $jurnal = $this->jurnalServices->createNoJurnal();
+            return $this->returnResponse('success', self::HTTP_OK, 'No Jurnal', $jurnal);
+        } catch (Exception $ex) {
+            return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
+        }
+    }
 }

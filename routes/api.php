@@ -5,12 +5,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Akun\AkunController;
 use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Barang\BarangController;
 use App\Http\Controllers\Jurnal\JurnalController;
 use App\Http\Controllers\Laporan\NeracaController;
 use App\Http\Controllers\Laporan\ArusKasController;
 use App\Http\Controllers\Laporan\LabaRugiController;
-use App\Http\Services\Laporan\PerubahanModalService;
-use App\Http\Controllers\Jurnal\DetailJurnalController;
+use App\Http\Controllers\Supplier\SupplierController;
+use App\Http\Controllers\Jurnal\JurnalDetailController;
 use App\Http\Controllers\Pembelian\PembelianController;
 use App\Http\Controllers\Penjualan\PenjualanController;
 use App\Http\Controllers\Laporan\PerubahanModalController;
@@ -44,9 +45,32 @@ Route::middleware(['auth:api'])->group(function(){
         Route::delete('/akun', 'destroyMultiple')->name('akun.destroyMultiple');
     });
 
+    /* SUPPLIER */
+    Route::controller(SupplierController::class)->group(function(){
+        Route::get('/supplier/options', 'fetchDataOptions')->name('supplier.fetchDataOptions');
+        Route::get('/supplier', 'index')->name('supplier.index');
+        Route::post('/supplier', 'store')->name('supplier.store');
+        Route::get('/supplier/{id}', 'show')->name('supplier.show');
+        Route::put('/supplier/{id}', 'update')->name('supplier.update');
+        Route::delete('/supplier/{id}', 'destroy')->name('supplier.destroy');
+        Route::delete('/supplier', 'destroyMultiple')->name('supplier.destroyMultiple');
+    });
+
+    /* BARANG */
+    Route::controller(BarangController::class)->group(function(){
+        Route::get('/barang/options', 'fetchDataOptions')->name('barang.fetchDataOptions');
+        Route::get('/barang', 'index')->name('barang.index');
+        Route::post('/barang', 'store')->name('barang.store');
+        Route::get('/barang/{id}', 'show')->name('barang.show');
+        Route::put('/barang/{id}', 'update')->name('barang.update');
+        Route::delete('/barang/{id}', 'destroy')->name('barang.destroy');
+        Route::delete('/barang', 'destroyMultiple')->name('barang.destroyMultiple');
+    });
+
     /* PEMBELIAN */
     Route::controller(PembelianController::class)->group(function(){
         Route::get('/pembelian/charts', 'charts')->name('pembelian.charts');
+        Route::get('/pembelian/invoice', 'getInvoiceNumber')->name('pembelian.getInvoiceNumber');
         Route::get('/pembelian/all', 'list')->name('pembelian.list');
         Route::get('/pembelian', 'index')->name('pembelian.index');
         Route::post('/pembelian', 'store')->name('pembelian.store');
@@ -59,6 +83,7 @@ Route::middleware(['auth:api'])->group(function(){
     /* PENJUALAN */
     Route::controller(PenjualanController::class)->group(function(){
         Route::get('/penjualan/charts', 'charts')->name('penjualan.charts');
+        Route::get('/penjualan/invoice', 'getInvoiceNumber')->name('penjualan.getInvoiceNumber');
         Route::get('/penjualan/all', 'list')->name('penjualan.list');
         Route::get('/penjualan', 'index')->name('penjualan.index');
         Route::post('/penjualan', 'store')->name('penjualan.store');
@@ -70,6 +95,7 @@ Route::middleware(['auth:api'])->group(function(){
 
     /* JURNAL UMUM */
     Route::controller(JurnalController::class)->group(function(){
+        Route::get('/jurnal/number', 'getJournalNumber')->name('jurnal.getJournalNumber');
         Route::get('/jurnal/all', 'list')->name('jurnal.list');
         Route::get('/jurnal', 'index')->name('jurnal.index');
         Route::post('/jurnal', 'store')->name('jurnal.store');
@@ -80,7 +106,7 @@ Route::middleware(['auth:api'])->group(function(){
     });
 
     /* DETAIL JURNAL UMUM */
-    Route::controller(DetailJurnalController::class)->group(function(){
+    Route::controller(JurnalDetailController::class)->group(function(){
         Route::get('/detail-jurnal', 'index')->name('detail-jurnal.index');
         Route::post('/detail-jurnal', 'store')->name('detail-jurnal.store');
         Route::get('/detail-jurnal/{id}', 'show')->name('detail-jurnal.show');

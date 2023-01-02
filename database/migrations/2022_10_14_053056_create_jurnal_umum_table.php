@@ -19,7 +19,9 @@ return new class extends Migration
             $table->date('tanggal_transaksi');
             $table->text('deskripsi')->nullable();
             $table->string('sumber', 150)->nullable();
-            $table->string('kode_user', 150);
+            $table->string('gambar', 255)->nullable();
+            $table->bigInteger('id_user')->unsigned();
+            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });
