@@ -19,7 +19,6 @@ class UserService extends BaseService
         $this->model = $this->returnNewUserApp();
         $this->carbon = $this->returnCarbon();
         $this->hash = $this->returnHash();
-        $this->str = $this->returnStr();
     }
 
     /* FETCH ALL USER */
@@ -76,7 +75,8 @@ class UserService extends BaseService
         DB::beginTransaction();
 
         try {
-            $newID = $this->createKodeUser();
+            /* GENERATE NEW ID */
+            $newID = $this->checkNumberExists($props['kode_user']) ? $this->createKodeUser() : $props['kode_user'];
 
             $user = $this->returnNewUserApp();
             $user->kode_user    = $newID;
@@ -152,7 +152,6 @@ class UserService extends BaseService
         $userId = $this->returnAuthUser()->id;
 
         try {
-            $this->oldValues = $this->model::find($userId);
             $user = $this->model::find($userId);
             if ($user) {
                 /* UPDATE USER */
@@ -348,5 +347,12 @@ class UserService extends BaseService
         $newID  = 'A-'.substr("0000000$newID", -3);
 
         return $newID;
+    }
+
+    /* CHECK INV NUMBER EXISTS */
+    public function checkNumberExists($number){
+        $exists = $this->model::where('kode_user', '=', $number)->exists();
+
+        return $exists;
     }
 }

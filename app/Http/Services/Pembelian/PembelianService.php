@@ -215,7 +215,7 @@ class PembelianService extends BaseService
             $pembayaran->kode_akun      = $akunPembayaran->kode_akun;
             $pembayaran->nama_akun      = $akunPembayaran->nama_akun;
             $pembayaran->debet          = 0;
-            $pembayaran->kredit         = $props->grand_total;
+            $pembayaran->kredit         = $props->total;
             $pembayaran->save();
 
             /* COMMIT DB TRANSACTION */
@@ -298,7 +298,7 @@ class PembelianService extends BaseService
                 /* PERKIRAAN                  DEBET             KREDIT
                 /*--------------------------------------------------------------*/
                 /* PERSEDIAAN                 XXX
-                /* DISKON                     XXX
+                /*      DISKON                                  XXX
                 /*      KAS / UTANG USAHA                       XXX
                 /*--------------------------------------------------------------*/
 
@@ -326,7 +326,7 @@ class PembelianService extends BaseService
                 $persediaan->id_akun        = $akunPersediaan->id;
                 $persediaan->kode_akun      = $akunPersediaan->kode_akun;
                 $persediaan->nama_akun      = $akunPersediaan->nama_akun;
-                $persediaan->debet          = floatval($props->grand_total);
+                $persediaan->debet          = floatval($props->total);
                 $persediaan->kredit         = 0;
                 $persediaan->save();
 
@@ -338,8 +338,8 @@ class PembelianService extends BaseService
                 $diskon->id_akun        = $akunDiskon->id;
                 $diskon->kode_akun      = $akunDiskon->kode_akun;
                 $diskon->nama_akun      = $akunDiskon->nama_akun;
-                $diskon->debet          = floatval($props->diskon);
-                $diskon->kredit         = 0;
+                $diskon->debet          = 0;
+                $diskon->kredit         = floatval($props->diskon);
                 $diskon->save();
 
                 /* PEMBAYARAN */

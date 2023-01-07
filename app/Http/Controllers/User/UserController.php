@@ -34,6 +34,7 @@ class UserController extends BaseController
     {
         try {
             $rules = [
+                'kode_user'             => 'required',
                 'nama'			        => 'required|string|max:255',
                 'alamat'                => 'nullable',
                 'no_telp'               => 'nullable',
@@ -175,6 +176,16 @@ class UserController extends BaseController
             $users = $this->userServices->fetchDataOptions($props);
 
             return $this->returnResponse('success', self::HTTP_OK, 'Daftar user', $users);
+        } catch (Exception $ex) {
+            return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
+        }
+    }
+
+    public function getNumber()
+    {
+        try {
+            $user = $this->userServices->createKodeUser();
+            return $this->returnResponse('success', self::HTTP_OK, 'Kode user', $user);
         } catch (Exception $ex) {
             return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
         }

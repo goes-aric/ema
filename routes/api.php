@@ -10,6 +10,8 @@ use App\Http\Controllers\Jurnal\JurnalController;
 use App\Http\Controllers\Laporan\NeracaController;
 use App\Http\Controllers\Laporan\ArusKasController;
 use App\Http\Controllers\Laporan\LabaRugiController;
+use App\Http\Controllers\Laporan\LaporanPembelianController;
+use App\Http\Controllers\Laporan\LaporanPenjualanController;
 use App\Http\Controllers\Supplier\SupplierController;
 use App\Http\Controllers\Jurnal\JurnalDetailController;
 use App\Http\Controllers\Pembelian\PembelianController;
@@ -115,6 +117,16 @@ Route::middleware(['auth:api'])->group(function(){
         Route::delete('/detail-jurnal', 'destroyMultiple')->name('detail-jurnal.destroyMultiple');
     });
 
+    /* DATA LAP PEMBELIAN */
+    Route::controller(LaporanPembelianController::class)->group(function(){
+        Route::get('/laporan-pembelian', 'dataPembelian')->name('laporan.dataPembelian');
+    });
+
+    /* DATA LAP PENJUALAN */
+    Route::controller(LaporanPenjualanController::class)->group(function(){
+        Route::get('/laporan-penjualan', 'dataPenjualan')->name('laporan.dataPenjualan');
+    });
+
     /* DATA NERACA */
     Route::controller(NeracaController::class)->group(function(){
         Route::get('/neraca/data', 'dataAkun')->name('neraca.dataAkun');
@@ -138,6 +150,7 @@ Route::middleware(['auth:api'])->group(function(){
     /* USERS & LOGOUT */
     Route::controller(UserController::class)->group(function(){
         Route::get('/users/options', 'fetchDataOptions')->name('users.fetchDataOptions');
+        Route::get('/users/number', 'getNumber')->name('users.getNumber');
         Route::delete('/users', 'destroyMultiple')->name('users.destroyMultiple');
         Route::put('/users/profile', 'updateProfile')->name('users.updateProfile');
         Route::put('/users/password', 'changePassword')->name('users.changePassword');
